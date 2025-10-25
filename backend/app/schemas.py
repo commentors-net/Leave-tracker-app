@@ -20,6 +20,20 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str
+    password: str
+    token: str
+
+class RegisterResponse(BaseModel):
+    qr: str
+    secret: str
+    username: str
+    id: int
+
+class PasswordChange(BaseModel):
+    username: str
+    old_password: str
+    new_password: str
+
 class AbsenceBase(BaseModel):
     date: date
     duration: str

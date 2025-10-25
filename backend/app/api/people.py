@@ -26,3 +26,22 @@ def create_people(people: schemas.PeopleCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_people)
     return db_people
+
+@router.put("/people/{people_id}", response_model=schemas.People)
+def update_people(people_id: int, people: schemas.PeopleCreate, db: Session = Depends(get_db)):
+    db_people = db.query(People).filter(People.id == people_id).first()
+    if not db_people:
+        raise HTTPException(status_code=404, detail="Person not found")
+    db_people.name = people.name
+    db.commit()
+    db.refresh(db_people)
+    return db_people
+
+@router.delete("/people/{people_id}")
+def delete_people(people_id: int, db: Session = Depends(get_db)):
+    db_people = db.query(People).filter(People.id == people_id).first()
+    if not db_people:
+        raise HTTPException(status_code=404, detail="Person not found")
+    db.delete(db_people)
+    db.commit()
+    return {"message": "Person deleted successfully"}

@@ -7,3 +7,5 @@ pyotp
 qrcode
 pillow
 python-jose[cryptography]
+python-multipart
+passlib[bcrypt]

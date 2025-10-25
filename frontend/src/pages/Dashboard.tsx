@@ -32,6 +32,13 @@ export default function Dashboard() {
         reason,
       });
       alert("Absence logged successfully!");
+      
+      // Clear the form
+      setSelectedPerson("");
+      setSelectedType("");
+      setDate("");
+      setDuration("");
+      setReason("");
     } catch (err) {
       alert("Failed to log absence");
     }

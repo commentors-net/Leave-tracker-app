@@ -4,9 +4,9 @@ This guide explains how to run the Leave Tracker application locally for develop
 
 ## Prerequisites
 
-- Python 3.10 or higher
-- Node.js 16 or higher
-- npm or yarn
+- Python 3.11 or higher (tested with Python 3.11.6)
+- Node.js 22 or higher (tested with Node.js 22.12.0)
+- npm 11 or higher (tested with npm 11.6.1)
 
 ## Backend Setup
 
@@ -134,12 +134,12 @@ The built files will be in the `dist` directory and can be served with any stati
 ## Troubleshooting
 
 ### Backend won't start
-- Ensure Python 3.10+ is installed
+- Ensure Python 3.11+ is installed
 - Check that all dependencies are installed: `pip install -r requirements.txt`
 - Verify no other process is using port 8000
 
 ### Frontend won't start
-- Ensure Node.js 16+ is installed
+- Ensure Node.js 22+ is installed
 - Delete `node_modules` and `package-lock.json`, then run `npm install` again
 - Check that no other process is using port 5173
 

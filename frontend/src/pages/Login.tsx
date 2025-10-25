@@ -1,18 +1,33 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { TextField, Button, Card, Typography } from "@mui/material";
 
 export default function Login() {
   const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [token, setToken] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post("http://localhost:8000/auth/login", { username, token });
-      alert(res.data.success ? "Login success!" : "Invalid 2FA token");
-    } catch (err) {
-      alert("Login failed");
+      const res = await axios.post("http://localhost:8000/auth/login", { username, password, token });
+      if (res.data.success) {
+        // Store JWT token in localStorage
+        localStorage.setItem("access_token", res.data.access_token);
+        localStorage.setItem("username", res.data.username);
+        
+        // Trigger storage event for app state update
+        window.dispatchEvent(new Event('storage'));
+        
+        alert("Login successful!");
+        // Redirect to dashboard
+        navigate("/dashboard");
+      }
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.detail || "Login failed: Invalid credentials or 2FA token";
+      alert(errorMsg);
     }
   };
 
@@ -20,6 +35,14 @@ export default function Login() {
     <Card sx={{ p: 4, width: 300, mx: "auto", mt: 10 }}>
       <Typography variant="h6">2FA Login</Typography>
       <TextField label="Username" value={username} onChange={e => setUsername(e.target.value)} fullWidth margin="normal" />
+      <TextField 
+        label="Password" 
+        type="password"
+        value={password} 
+        onChange={e => setPassword(e.target.value)} 
+        fullWidth 
+        margin="normal" 
+      />
       <TextField label="2FA Token" value={token} onChange={e => setToken(e.target.value)} fullWidth margin="normal" />
       <Button variant="contained" fullWidth onClick={handleLogin}>Login</Button>
     </Card>
