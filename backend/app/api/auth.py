@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import pyotp, qrcode, io, base64
-from .. import models, schemas
-from ..database import SessionLocal, engine
+from ..models import User
+from .. import schemas
+from ..database import SessionLocal, engine, Base
 
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 router = APIRouter()
 
@@ -17,11 +18,11 @@ def get_db():
 
 @router.post("/register", response_model=schemas.User)
 def register(data: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(models.User).filter(models.User.username == data.username).first()
+    db_user = db.query(User).filter(User.username == data.username).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     secret = pyotp.random_base32()
-    user = models.User(username=data.username, password=data.password, otp_secret=secret)
+    user = User(username=data.username, password=data.password, otp_secret=secret)
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -35,7 +36,7 @@ def register(data: schemas.UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login")
 def login(data: schemas.TokenData, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.username == data.username).first()
+    user = db.query(User).filter(User.username == data.username).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     totp = pyotp.TOTP(user.otp_secret)

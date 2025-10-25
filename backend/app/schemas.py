@@ -12,15 +12,14 @@ class User(UserBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class Token(BaseModel):
     access_token: str
     token_type: str
 
 class TokenData(BaseModel):
-    username: str | None = None
-
+    username: str
 class AbsenceBase(BaseModel):
     date: date
     duration: str
@@ -35,7 +34,7 @@ class Absence(AbsenceBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class PeopleBase(BaseModel):
     name: str
@@ -47,7 +46,7 @@ class People(PeopleBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class TypeBase(BaseModel):
     name: str
@@ -59,4 +58,4 @@ class Type(TypeBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
