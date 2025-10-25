@@ -21,7 +21,7 @@ def read_absences(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 
 @router.post("/absences", response_model=schemas.Absence)
 def create_absence(absence: schemas.AbsenceCreate, db: Session = Depends(get_db)):
-    db_absence = Absence(**absence.dict())
+    db_absence = Absence(**absence.model_dump())
     db.add(db_absence)
     db.commit()
     db.refresh(db_absence)
