@@ -13,6 +13,11 @@ def get_db():
     finally:
         db.close()
 
+@router.get("/absences", response_model=list[schemas.Absence])
+def read_absences(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    absences = db.query(models.Absence).offset(skip).limit(limit).all()
+    return absences
+
 @router.post("/absences", response_model=schemas.Absence)
 def create_absence(absence: schemas.AbsenceCreate, db: Session = Depends(get_db)):
     db_absence = models.Absence(**absence.dict())

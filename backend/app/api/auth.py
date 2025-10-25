@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import pyotp, qrcode, io, base64
 from .. import models, schemas
-from ..database import SessionLocal, engine
+from ..database import SessionLocal, engine, Base
 
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 router = APIRouter()
 
