@@ -1,8 +1,8 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { TextField, Button, Card, Typography, Box } from "@mui/material";
+import { authApi } from "@services/api";
 
 export default function Register() {
   const [username, setUsername] = useState("");
@@ -13,9 +13,9 @@ export default function Register() {
 
   const handleRegister = async () => {
     try {
-      const res = await axios.post("http://localhost:8000/auth/register", { username, password });
-      setQrCode(res.data.qr);
-      setSecret(res.data.secret);
+      const res = await authApi.register({ username, password });
+      setQrCode(res.qr);
+      setSecret(res.secret);
     } catch (err) {
       alert("Registration failed");
     }

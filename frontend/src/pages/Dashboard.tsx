@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { TextField, Button, Card, Typography, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
+import { peopleApi, typesApi, absencesApi } from "@services/api";
+import type { Person, LeaveType } from "@services/api";
 
 export default function Dashboard() {
-  const [people, setPeople] = useState([]);
-  const [types, setTypes] = useState([]);
+  const [people, setPeople] = useState<Person[]>([]);
+  const [types, setTypes] = useState<LeaveType[]>([]);
   const [selectedPerson, setSelectedPerson] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [date, setDate] = useState("");
@@ -14,19 +15,26 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const peopleRes = await axios.get("http://localhost:8000/api/people");
-      setPeople(peopleRes.data);
-      const typesRes = await axios.get("http://localhost:8000/api/types");
-      setTypes(typesRes.data);
+      try {
+        const [peopleData, typesData] = await Promise.all([
+          peopleApi.getAll(),
+          typesApi.getAll()
+        ]);
+        setPeople(peopleData);
+        setTypes(typesData);
+      } catch (err) {
+        console.error("Failed to fetch data:", err);
+        alert("Failed to load data. Please login again.");
+      }
     };
     fetchData();
   }, []);
 
   const handleSubmit = async () => {
     try {
-      await axios.post("http://localhost:8000/api/absences", {
-        person_id: selectedPerson,
-        type_id: selectedType,
+      await absencesApi.create({
+        person_id: Number(selectedPerson),
+        type_id: Number(selectedType),
         date,
         duration,
         reason,
@@ -50,7 +58,7 @@ export default function Dashboard() {
       <FormControl fullWidth margin="normal">
         <InputLabel>Person</InputLabel>
         <Select value={selectedPerson} onChange={(e) => setSelectedPerson(e.target.value)}>
-          {people.map((person: any) => (
+          {people.map((person) => (
             <MenuItem key={person.id} value={person.id}>{person.name}</MenuItem>
           ))}
         </Select>
@@ -67,7 +75,7 @@ export default function Dashboard() {
       <FormControl fullWidth margin="normal">
         <InputLabel>Type</InputLabel>
         <Select value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
-          {types.map((type: any) => (
+          {types.map((type) => (
             <MenuItem key={type.id} value={type.id}>{type.name}</MenuItem>
           ))}
         </Select>

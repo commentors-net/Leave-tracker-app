@@ -3,17 +3,27 @@ Password encryption using the password itself as the encryption key.
 The username is encrypted using a key derived from the password.
 This means the password is never stored, and cannot be recovered.
 """
+import os
 import base64
 import hashlib
 from datetime import datetime, timedelta
 from typing import Optional
 from cryptography.fernet import Fernet
 from jose import JWTError, jwt
+from dotenv import load_dotenv
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-# JWT Configuration
-SECRET_KEY = "your-secret-key-change-this-in-production-use-openssl-rand-hex-32"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# Load environment variables
+load_dotenv()
+
+# JWT Configuration from environment variables
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production-use-openssl-rand-hex-32")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+
+# Security scheme for JWT Bearer token
+security = HTTPBearer()
 
 
 def derive_key_from_password(password: str) -> bytes:
@@ -122,3 +132,27 @@ def verify_token(token: str) -> Optional[str]:
         return username
     except JWTError:
         return None
+
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
+    """
+    FastAPI dependency to get current authenticated user from JWT token.
+    
+    Args:
+        credentials: HTTP Authorization credentials (Bearer token)
+    
+    Returns:
+        Username from validated token
+    
+    Raises:
+        HTTPException: If token is invalid or missing
+    """
+    token = credentials.credentials
+    username = verify_token(token)
+    if username is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return username

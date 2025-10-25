@@ -1,8 +1,8 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { TextField, Button, Card, Typography } from "@mui/material";
+import { authApi } from "@services/api";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -12,19 +12,18 @@ export default function Login() {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post("http://localhost:8000/auth/login", { username, password, token });
-      if (res.data.success) {
-        // Store JWT token in localStorage
-        localStorage.setItem("access_token", res.data.access_token);
-        localStorage.setItem("username", res.data.username);
-        
-        // Trigger storage event for app state update
-        window.dispatchEvent(new Event('storage'));
-        
-        alert("Login successful!");
-        // Redirect to dashboard
-        navigate("/dashboard");
-      }
+      const res = await authApi.login({ username, password, token });
+      
+      // Store JWT token in localStorage
+      localStorage.setItem("access_token", res.access_token);
+      localStorage.setItem("username", res.username);
+      
+      // Trigger storage event for app state update
+      window.dispatchEvent(new Event('storage'));
+      
+      alert("Login successful!");
+      // Redirect to dashboard
+      navigate("/dashboard");
     } catch (err: any) {
       const errorMsg = err.response?.data?.detail || "Login failed: Invalid credentials or 2FA token";
       alert(errorMsg);

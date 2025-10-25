@@ -1,7 +1,10 @@
 # 🧭 Team Attendance Tracker (Google Cloud Free Tier, FastAPI + React)
 
 A **Google Cloud–hosted web app** built with **FastAPI (Python)** backend and **React (TypeScript)** frontend.  
-It provides secure **login with 2FA (QR-based, e.g. Google Authenticator)** and a **dashboard form** to track team members’ leaves, WFH, or medical absences.
+It provides secure **login with 2FA (QR-based, e.g. Google Authenticator)** and a **dashboard form** to track team members' leaves, WFH, or medical absences.
+
+> 📖 **New to this project?** Start with **[QUICKSTART_ENV.md](./QUICKSTART_ENV.md)** for quick environment setup!  
+> For detailed instructions, see **[SETUP.md](./SETUP.md)** and **[ENVIRONMENT_CONFIG.md](./ENVIRONMENT_CONFIG.md)**
 
 ---
 

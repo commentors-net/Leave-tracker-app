@@ -9,3 +9,4 @@ pillow
 python-jose[cryptography]
 python-multipart
 passlib[bcrypt]
+python-dotenv

@@ -163,15 +163,89 @@ The built files will be in the `dist` directory and can be served with any stati
 
 ## Environment Variables
 
-Currently, the application uses default configurations. For production:
+The application uses environment variables for configuration. Example files (`.env.example`) are provided - copy them to create your own `.env` files.
 
-### Backend
-- `DATABASE_URL`: SQLite database path (default: `sqlite:///./database.db`)
-- `PORT`: Server port (default: 8080 for Docker, 8000 for local)
+### Backend Environment Configuration
 
-### Frontend
-- `VITE_API_URL`: Backend API URL (default: `http://localhost:8000`)
+1. **Copy the example file:**
+   ```bash
+   cd backend
+   cp .env.example .env
+   ```
 
-To use custom environment variables, create `.env` files:
-- Backend: Create `.env` in the `backend` directory
-- Frontend: Create `.env` in the `frontend` directory
+2. **Configure the following variables in `backend/.env`:**
+
+   | Variable | Description | Default | Required |
+   |----------|-------------|---------|----------|
+   | `SECRET_KEY` | JWT token signing key (use a strong random key) | Generated value | Yes |
+   | `ALGORITHM` | JWT algorithm | HS256 | No |
+   | `ACCESS_TOKEN_EXPIRE_MINUTES` | JWT token expiration time | 30 | No |
+   | `DATABASE_URL` | Database connection string | sqlite:///./database.db | No |
+   | `PORT` | Server port | 8000 | No |
+   | `HOST` | Server host | 0.0.0.0 | No |
+   | `CORS_ORIGINS` | Allowed CORS origins (comma-separated) | http://localhost:5173,http://localhost:3000 | No |
+
+3. **Generate a secure SECRET_KEY:**
+   ```bash
+   python -c "import secrets; print(secrets.token_hex(32))"
+   ```
+   Copy the output and replace the `SECRET_KEY` value in `.env`
+
+### Frontend Environment Configuration
+
+1. **For Development:**
+   - The `.env.development` file is already configured with `VITE_API_URL=http://localhost:8000`
+   - No changes needed for local development
+
+2. **For Production:**
+   - Copy `.env.production` to `.env.production.local` (optional)
+   - Update `VITE_API_URL` to your production backend URL:
+     ```bash
+     VITE_API_URL=https://your-production-api.com
+     ```
+
+3. **Environment Files Priority:**
+   - `.env.local` - loaded in all cases, ignored by git
+   - `.env.development` - loaded in development mode
+   - `.env.production` - loaded in production mode
+   - `.env` - loaded in all cases
+
+### Security Notes
+
+⚠️ **Important:**
+- Never commit `.env` files to version control
+- The `.gitignore` file is configured to exclude `.env` files
+- Always use strong, randomly generated values for `SECRET_KEY`
+- In production, use environment-specific secrets management (e.g., Google Cloud Secret Manager)
+- Rotate your `SECRET_KEY` periodically in production
+
+### Environment Variable Reference
+
+**Backend (.env):**
+```env
+# JWT Configuration
+SECRET_KEY=your-secret-key-change-this-in-production-use-openssl-rand-hex-32
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# Database Configuration
+DATABASE_URL=sqlite:///./database.db
+
+# Server Configuration
+PORT=8000
+HOST=0.0.0.0
+
+# CORS Configuration (comma-separated origins)
+CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+```
+
+**Frontend (.env.development):**
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+**Frontend (.env.production):**
+```env
+VITE_API_URL=https://your-production-api.com
+```
+

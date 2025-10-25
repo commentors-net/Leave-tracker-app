@@ -4,3 +4,13 @@ __pycache__/
 *.pyc
 database.db
 .vscode/
+
+# Environment files with sensitive data
+.env
+backend/.env
+frontend/.env.local
+
+# Keep example environment files
+!.env.example
+!backend/.env.example
+!frontend/.env.example

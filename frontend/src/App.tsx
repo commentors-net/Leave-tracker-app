@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Container, Button } from '@mui/material';
 import { useState, useEffect } from 'react';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Settings from './pages/Settings';
+import Login from '@pages/Login';
+import Register from '@pages/Register';
+import Dashboard from '@pages/Dashboard';
+import Settings from '@pages/Settings';
 
 function AppContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

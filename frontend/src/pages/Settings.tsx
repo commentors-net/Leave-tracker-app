@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import {
   Card,
   Typography,
@@ -20,6 +19,8 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { peopleApi, typesApi } from "@services/api";
+import type { Person, LeaveType } from "@services/api";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -43,8 +44,8 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function Settings() {
-  const [people, setPeople] = useState<any[]>([]);
-  const [types, setTypes] = useState<any[]>([]);
+  const [people, setPeople] = useState<Person[]>([]);
+  const [types, setTypes] = useState<LeaveType[]>([]);
   const [newPersonName, setNewPersonName] = useState("");
   const [newTypeName, setNewTypeName] = useState("");
   const [tabValue, setTabValue] = useState(0);
@@ -59,19 +60,22 @@ export default function Settings() {
 
   const fetchData = async () => {
     try {
-      const peopleRes = await axios.get("http://localhost:8000/api/people");
-      setPeople(peopleRes.data);
-      const typesRes = await axios.get("http://localhost:8000/api/types");
-      setTypes(typesRes.data);
+      const [peopleData, typesData] = await Promise.all([
+        peopleApi.getAll(),
+        typesApi.getAll()
+      ]);
+      setPeople(peopleData);
+      setTypes(typesData);
     } catch (err) {
       console.error("Failed to fetch data", err);
+      alert("Failed to load data. Please login again.");
     }
   };
 
   const handleAddPerson = async () => {
     if (!newPersonName.trim()) return;
     try {
-      await axios.post("http://localhost:8000/api/people", { name: newPersonName });
+      await peopleApi.create({ name: newPersonName });
       setNewPersonName("");
       fetchData();
     } catch (err) {
@@ -82,7 +86,7 @@ export default function Settings() {
   const handleAddType = async () => {
     if (!newTypeName.trim()) return;
     try {
-      await axios.post("http://localhost:8000/api/types", { name: newTypeName });
+      await typesApi.create({ name: newTypeName });
       setNewTypeName("");
       fetchData();
     } catch (err) {
@@ -104,8 +108,11 @@ export default function Settings() {
   const handleEditSave = async () => {
     if (!editName.trim() || !editItem) return;
     try {
-      const endpoint = editType === "person" ? "people" : "types";
-      await axios.put(`http://localhost:8000/api/${endpoint}/${editItem.id}`, { name: editName });
+      if (editType === "person") {
+        await peopleApi.update(editItem.id, { name: editName });
+      } else {
+        await typesApi.update(editItem.id, { name: editName });
+      }
       setEditDialogOpen(false);
       setEditItem(null);
       setEditName("");
@@ -118,8 +125,11 @@ export default function Settings() {
   const handleDelete = async (id: number, type: "person" | "type") => {
     if (!confirm(`Are you sure you want to delete this ${type}?`)) return;
     try {
-      const endpoint = type === "person" ? "people" : "types";
-      await axios.delete(`http://localhost:8000/api/${endpoint}/${id}`);
+      if (type === "person") {
+        await peopleApi.delete(id);
+      } else {
+        await typesApi.delete(id);
+      }
       fetchData();
     } catch (err) {
       alert(`Failed to delete ${type}`);

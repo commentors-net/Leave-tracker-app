@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
+// Production-specific configuration
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -13,11 +14,17 @@ export default defineConfig({
       '@components': path.resolve(__dirname, './src/components'),
     },
   },
-  server: {
-    port: 5173,
-  },
   build: {
     outDir: 'dist',
     sourcemap: false,
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          mui: ['@mui/material', '@mui/icons-material'],
+        },
+      },
+    },
   },
 })
