@@ -20,8 +20,6 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str
-    token: str
-
 class AbsenceBase(BaseModel):
     date: date
     duration: str
