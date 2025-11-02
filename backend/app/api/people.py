@@ -1,66 +1,48 @@
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from ..models import People
 from .. import schemas
-from ..database import SessionLocal
+from ..firestore_db import firestore_db
 from ..core.security import get_current_user
 
 router = APIRouter()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 @router.get("/people", response_model=list[schemas.People])
 def read_people(
     skip: int = 0, 
-    limit: int = 100, 
-    db: Session = Depends(get_db),
+    limit: int = 100,
     current_user: str = Depends(get_current_user)
 ):
-    people = db.query(People).offset(skip).limit(limit).all()
-    return people
+    people = firestore_db.get_all_people()
+    # Apply pagination
+    return people[skip:skip+limit]
 
 @router.post("/people", response_model=schemas.People)
 def create_people(
-    people: schemas.PeopleCreate, 
-    db: Session = Depends(get_db),
+    people: schemas.PeopleCreate,
     current_user: str = Depends(get_current_user)
 ):
-    db_people = People(name=people.name)
-    db.add(db_people)
-    db.commit()
-    db.refresh(db_people)
-    return db_people
+    person = firestore_db.create_person(people.name)
+    return person
 
 @router.put("/people/{people_id}", response_model=schemas.People)
 def update_people(
-    people_id: int, 
-    people: schemas.PeopleCreate, 
-    db: Session = Depends(get_db),
+    people_id: str, 
+    people: schemas.PeopleCreate,
     current_user: str = Depends(get_current_user)
 ):
-    db_people = db.query(People).filter(People.id == people_id).first()
-    if not db_people:
+    person = firestore_db.get_person_by_id(people_id)
+    if not person:
         raise HTTPException(status_code=404, detail="Person not found")
-    db_people.name = people.name
-    db.commit()
-    db.refresh(db_people)
-    return db_people
+    updated_person = firestore_db.update_person(people_id, people.name)
+    return updated_person
 
 @router.delete("/people/{people_id}")
 def delete_people(
-    people_id: int, 
-    db: Session = Depends(get_db),
+    people_id: str,
     current_user: str = Depends(get_current_user)
 ):
-    db_people = db.query(People).filter(People.id == people_id).first()
-    if not db_people:
+    person = firestore_db.get_person_by_id(people_id)
+    if not person:
         raise HTTPException(status_code=404, detail="Person not found")
-    db.delete(db_people)
-    db.commit()
+    firestore_db.delete_person(people_id)
     return {"message": "Person deleted successfully"}

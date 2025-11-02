@@ -1,14 +1,23 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 import google.generativeai as genai
 import os
 import json
 import re
 from datetime import datetime
+from ..models import User
 from .. import schemas
-from ..firestore_db import firestore_db
+from ..database import SessionLocal
 from ..core.security import get_current_user
 
 router = APIRouter()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # Configure Gemini API
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -17,8 +26,9 @@ if GEMINI_API_KEY:
 
 @router.post("/smart-identify", response_model=schemas.SmartIdentificationResponse)
 async def smart_identify_leaves(
-    request: schemas.SmartIdentificationRequest,
-    current_user: str = Depends(get_current_user)
+    request: schemas.SmartIdentificationRequest, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
     Parse chat conversations to identify leave requests using Google Gemini AI.
@@ -37,14 +47,15 @@ async def smart_identify_leaves(
         )
     
     try:
-        # Get all people and leave types from Firestore for context
-        people = firestore_db.get_all_people()
-        leave_types = firestore_db.get_all_types()
+        # Get all people and leave types from database for context
+        from ..models import People, Type, AIInstructions
+        people = db.query(People).all()
+        leave_types = db.query(Type).all()
         
-        # Get AI instructions from Firestore
-        ai_instructions = firestore_db.get_ai_instructions()
+        # Get AI instructions from database
+        ai_instructions = db.query(AIInstructions).first()
         if ai_instructions:
-            rules_text = ai_instructions["instructions"]
+            rules_text = ai_instructions.instructions
         else:
             # Fallback to default rules if not in database
             rules_text = """RULES:
@@ -64,8 +75,8 @@ async def smart_identify_leaves(
   * "full day", "whole day", "entire day" → Full Day
 - Include the original message as the reason"""
         
-        people_names = [p["name"] for p in people] if people else []
-        leave_type_names = [t["name"] for t in leave_types] if leave_types else []
+        people_names = [p.name for p in people] if people else []
+        leave_type_names = [t.name for t in leave_types] if leave_types else []
         
         # Initialize Gemini model (use the latest stable flash model)
         model = genai.GenerativeModel('gemini-2.0-flash')
@@ -150,7 +161,7 @@ Return ONLY valid JSON, no additional text.
         )
 
 @router.get("/smart-identify/health")
-async def check_smart_identify_health(current_user: str = Depends(get_current_user)):
+async def check_smart_identify_health(current_user: User = Depends(get_current_user)):
     """Check if Gemini API is configured and accessible"""
     if not GEMINI_API_KEY:
         return {

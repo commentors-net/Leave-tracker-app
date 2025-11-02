@@ -12,3 +12,4 @@ python-multipart
 passlib[bcrypt]
 python-dotenv
 google-generativeai
+google-cloud-firestore

@@ -1,10 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 from datetime import datetime
+from ..models import User, AIInstructions
 from .. import schemas
-from ..firestore_db import firestore_db
+from ..database import SessionLocal
 from ..core.security import get_current_user
 
 router = APIRouter()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # Default AI instructions
 DEFAULT_INSTRUCTIONS = """RULES:
@@ -26,44 +35,73 @@ DEFAULT_INSTRUCTIONS = """RULES:
 
 @router.get("/ai-instructions", response_model=schemas.AIInstructions)
 async def get_ai_instructions(
-    current_user: str = Depends(get_current_user)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Get current AI instructions for Smart Identification"""
-    instructions = firestore_db.get_ai_instructions()
+    instructions = db.query(AIInstructions).first()
     
     if not instructions:
         # Create default instructions if none exist
-        instructions = firestore_db.create_ai_instructions(DEFAULT_INSTRUCTIONS)
+        now = datetime.utcnow().isoformat()
+        instructions = AIInstructions(
+            instructions=DEFAULT_INSTRUCTIONS,
+            created_at=now,
+            updated_at=now
+        )
+        db.add(instructions)
+        db.commit()
+        db.refresh(instructions)
     
     return instructions
 
 @router.put("/ai-instructions", response_model=schemas.AIInstructions)
 async def update_ai_instructions(
     request: schemas.AIInstructionsUpdate,
-    current_user: str = Depends(get_current_user)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Update AI instructions for Smart Identification"""
-    instructions = firestore_db.get_ai_instructions()
+    instructions = db.query(AIInstructions).first()
     
     if not instructions:
         # Create if doesn't exist
-        instructions = firestore_db.create_ai_instructions(request.instructions)
+        now = datetime.utcnow().isoformat()
+        instructions = AIInstructions(
+            instructions=request.instructions,
+            created_at=now,
+            updated_at=now
+        )
+        db.add(instructions)
     else:
         # Update existing
-        instructions = firestore_db.update_ai_instructions(instructions["id"], request.instructions)
+        instructions.instructions = request.instructions
+        instructions.updated_at = datetime.utcnow().isoformat()
     
+    db.commit()
+    db.refresh(instructions)
     return instructions
 
 @router.post("/ai-instructions/reset", response_model=schemas.AIInstructions)
 async def reset_ai_instructions(
-    current_user: str = Depends(get_current_user)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Reset AI instructions to default"""
-    instructions = firestore_db.get_ai_instructions()
+    instructions = db.query(AIInstructions).first()
     
     if not instructions:
-        instructions = firestore_db.create_ai_instructions(DEFAULT_INSTRUCTIONS)
+        now = datetime.utcnow().isoformat()
+        instructions = AIInstructions(
+            instructions=DEFAULT_INSTRUCTIONS,
+            created_at=now,
+            updated_at=now
+        )
+        db.add(instructions)
     else:
-        instructions = firestore_db.update_ai_instructions(instructions["id"], DEFAULT_INSTRUCTIONS)
+        instructions.instructions = DEFAULT_INSTRUCTIONS
+        instructions.updated_at = datetime.utcnow().isoformat()
     
+    db.commit()
+    db.refresh(instructions)
     return instructions
