@@ -11,6 +11,16 @@ backend/.env
 frontend/.env.local
 frontend/.env.production
 
+# Firestore and Google Cloud credentials
+backend/firestore-key.json
+backend/*-key.json
+*.json.key
+*service-account*.json
+
+# Data export files
+backend/data_export.json
+backend/id_mapping.json
+
 # Keep example environment files
 !.env.example
 !backend/.env.example

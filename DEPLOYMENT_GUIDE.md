@@ -60,7 +60,7 @@ cd d:\Jobs\workspace\python-projects\Leave-tracker-app
     -ProjectId "leave-tracker-2025" `
     -SecretKey "your-super-secret-key-min-32-chars-long" `
     -DbPassword "your-database-password-12-chars" `
-    -GeminiApiKey "AIzaSyCvOLSVY8uwDkDKwjBrVROXzwyBo1RfZhk" `
+    -GeminiApiKey "YOUR_GEMINI_API_KEY_HERE" `
     -Region "us-central1"
 ```
 
