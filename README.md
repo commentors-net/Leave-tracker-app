@@ -1,332 +1,661 @@
-# 🧭 Leave Tracker - Team Absence Management
+# 🧭 Leave Tracker - Team Absence Management# 🧭 Leave Tracker - Team Absence Management
 
-A **production-ready web application** built with **FastAPI (Python)** backend and **React (TypeScript)** frontend.  
+
+
+**Version 1.1.0** | A **production-ready web application** for managing team absences with AI-powered features.A **production-ready web application** built with **FastAPI (Python)** backend and **React (TypeScript)** frontend.  
+
 Features secure **JWT authentication with 2FA**, comprehensive leave management, and **one-command deployment to Google Cloud (Free Tier)**.
+
+Built with **FastAPI (Python)** + **React (TypeScript)** + **Google Cloud (100% Free Tier)**
+
+---
 
 ---
 
 ## 🎯 Quick Start
 
+## 🎯 Quick Start
+
 ### 🏃 Local Development
-```powershell
+
+### 📖 Complete Documentation```powershell
+
 # Press F5 in VS Code (both backend + frontend launch)
-# Or manually:
-cd backend; uvicorn app.main:app --reload
-cd frontend; npm run dev
-```
 
-### ☁️ Deploy to Google Cloud (FREE)
-```powershell
-# One command deployment!
+**👉 [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Everything you need:# Or manually:
+
+- ✅ Architecture & setup instructionscd backend; uvicorn app.main:app --reload
+
+- ✅ Feature implementation details  cd frontend; npm run dev
+
+- ✅ Security best practices```
+
+- ✅ Complete API reference
+
+- ✅ Google Cloud deployment guide### ☁️ Deploy to Google Cloud (FREE)
+
+- ✅ Configuration management```powershell
+
+- ✅ Troubleshooting & maintenance# One command deployment!
+
 .\deploy-to-gcp.ps1 `
-    -ProjectId "your-project-id" `
+
+### 🏃 Local Development (30 seconds)    -ProjectId "your-project-id" `
+
     -SecretKey "$(python -c 'import secrets; print(secrets.token_hex(32))')" `
-    -DbPassword "your-secure-password"
-```
-**See**: [QUICK_DEPLOY_GCP.md](./QUICK_DEPLOY_GCP.md) | [Full Guide](./GOOGLE_CLOUD_DEPLOYMENT.md)
 
----
+```powershell    -DbPassword "your-secure-password"
 
-## ✨ Features
+# Backend```
 
-### Core Functionality
-- 🔐 **Secure Authentication**: JWT tokens with 30-minute expiration
-- 🔑 **2FA**: Google Authenticator integration with QR codes
-- 👥 **People Management**: Add, edit, delete team members
-- � **Leave Types**: Customizable leave categories
-- 📅 **Absence Logging**: Track leaves with date, duration, type, reason
-- ⚙️ **Settings Interface**: Tabbed UI for managing people and types
-- 🎨 **Modern UI**: Material-UI components with responsive design
+cd backend**See**: [QUICK_DEPLOY_GCP.md](./QUICK_DEPLOY_GCP.md) | [Full Guide](./GOOGLE_CLOUD_DEPLOYMENT.md)
 
-### Technical Features
-- 🔒 **Custom Password Encryption**: Username encrypted with password-derived key
-- 🛡️ **JWT Protection**: All API endpoints secured
-- 🔄 **Automatic Token Handling**: Axios interceptors for seamless auth
-- 📁 **Path Aliases**: Clean imports (`@services/api`)
-- 🌐 **Environment Config**: Separate dev/prod configurations
-- � **Docker Ready**: Containerized backend for easy deployment
-- ☁️ **Cloud Native**: Optimized for Google Cloud Run + Cloud SQL
-
----
-
-## 🏗️ Architecture
-
-### Tech Stack
-```
-┌─────────────────────────────────────┐
-│  Frontend (React 19 + TypeScript)   │
-│  - Material-UI 7                    │
-│  - React Router 7                   │
-│  - Axios with JWT interceptors      │
-│  - Path aliases (@services/*)       │
-└──────────────┬──────────────────────┘
-               │ REST API (JWT Bearer)
-┌──────────────▼──────────────────────┐
-│  Backend (FastAPI + Python 3.11)    │
-│  - SQLAlchemy ORM                   │
-│  - JWT Authentication               │
-│  - Custom Password Encryption       │
-│  - 2FA (TOTP/Google Authenticator)  │
-└──────────────┬──────────────────────┘
-               │
-┌──────────────▼──────────────────────┐
-│  Database                            │
-│  - SQLite (local dev)               │
-│  - PostgreSQL (production/GCP)      │
-└─────────────────────────────────────┘
-```
-
-### Google Cloud Deployment
-```
-┌─────────────────────────────────────┐
-│  Cloud Storage + CDN (Frontend)     │
-│  ✓ 5GB storage free                 │
-│  ✓ 1GB egress free                  │
-└─────────────────────────────────────┘
-               │ HTTPS
-┌──────────────▼──────────────────────┐
-│  Cloud Run (Backend API)            │
-│  ✓ 2M requests/month free           │
-│  ✓ Auto-scaling 0-10 instances      │
-└──────────────┬──────────────────────┘
-               │ Private Connection
-┌──────────────▼──────────────────────┐
-│  Cloud SQL (PostgreSQL)             │
-│  ✓ db-f1-micro free tier            │
-│  ✓ 10GB storage free                │
-└─────────────────────────────────────┘
-```
-
----
-
-## 📋 Application Screens
-
-### Dashboard (Log Absence)
-| Field | Type | Options |
-|-------|------|---------|
-| **Person** | Dropdown | From People list (Settings) |
-| **Date** | Date Picker | Any date |
-| **Duration** | Dropdown | First Half / Second Half / Full |
-| **Type** | Dropdown | From Leave Types (Settings) |
-| **Reason** | Text Area | Free text |
-
-### Settings
-- **People Tab**: Add, edit, delete team members
-- **Leave Types Tab**: Manage leave categories (Annual, Medical, WFH, etc.)
-
----
-
-## 🚀 Development Setup
-
-### Prerequisites
-- Python 3.11+
-- Node.js 22+
-- npm 11+
-
-### Backend Setup
-```bash
-cd backend
-
-# Create virtual environment
 python -m venv venv
-.\venv\Scripts\activate  # Windows
-source venv/bin/activate  # Mac/Linux
 
-# Install dependencies
+.\venv\Scripts\activate---
+
 pip install -r requirements.txt
 
-# Create .env file
+uvicorn app.main:app --reload## ✨ Features
+
+
+
+# Frontend (new terminal)### Core Functionality
+
+cd frontend- 🔐 **Secure Authentication**: JWT tokens with 30-minute expiration
+
+npm install- 🔑 **2FA**: Google Authenticator integration with QR codes
+
+npm run dev- 👥 **People Management**: Add, edit, delete team members
+
+```- � **Leave Types**: Customizable leave categories
+
+- 📅 **Absence Logging**: Track leaves with date, duration, type, reason
+
+**Or press F5 in VS Code** - launches both backend + frontend automatically!- ⚙️ **Settings Interface**: Tabbed UI for managing people and types
+
+- 🎨 **Modern UI**: Material-UI components with responsive design
+
+### ☁️ Deploy to Google Cloud (15 minutes, FREE)
+
+### Technical Features
+
+```powershell- 🔒 **Custom Password Encryption**: Username encrypted with password-derived key
+
+.\deploy-to-gcp.ps1 `- 🛡️ **JWT Protection**: All API endpoints secured
+
+    -ProjectId "leave-tracker-2025" `- 🔄 **Automatic Token Handling**: Axios interceptors for seamless auth
+
+    -SecretKey "$(python -c 'import secrets; print(secrets.token_hex(32))')" `- 📁 **Path Aliases**: Clean imports (`@services/api`)
+
+    -DbPassword "your-secure-password" `- 🌐 **Environment Config**: Separate dev/prod configurations
+
+    -GeminiApiKey "your-gemini-api-key"- � **Docker Ready**: Containerized backend for easy deployment
+
+```- ☁️ **Cloud Native**: Optimized for Google Cloud Run + Cloud SQL
+
+
+
+**Cost**: $0/month (all within free tier limits)---
+
+
+
+---## 🏗️ Architecture
+
+
+
+## ✨ Features### Tech Stack
+
+```
+
+### 🔐 Authentication & Security┌─────────────────────────────────────┐
+
+- **JWT Tokens** with 30-minute expiration│  Frontend (React 19 + TypeScript)   │
+
+- **2FA (TOTP)** using Google Authenticator│  - Material-UI 7                    │
+
+- **Custom Encryption** - Username encrypted with password-derived key│  - React Router 7                   │
+
+- **Protected API** - All endpoints secured with JWT│  - Axios with JWT interceptors      │
+
+- **Registration Control** - Enable/disable public registration│  - Path aliases (@services/*)       │
+
+└──────────────┬──────────────────────┘
+
+### 📋 Leave Management               │ REST API (JWT Bearer)
+
+- **People Management** - Add, edit, delete team members┌──────────────▼──────────────────────┐
+
+- **Leave Types** - Customizable categories (Medical, Annual, WFH, etc.)│  Backend (FastAPI + Python 3.11)    │
+
+- **Absence Logging** - Track date, duration, type, reason│  - SQLAlchemy ORM                   │
+
+- **Settings Interface** - Clean tabbed UI for configuration│  - JWT Authentication               │
+
+│  - Custom Password Encryption       │
+
+### 🤖 Smart Identification (NEW in v1.1.0)│  - 2FA (TOTP/Google Authenticator)  │
+
+- **AI-Powered Parsing** - Automatically extract leave info from chat conversations└──────────────┬──────────────────────┘
+
+- **Google Gemini Integration** - Free tier (15 req/min, 1M tokens/day)               │
+
+- **Multi-Format Support** - WhatsApp, Telegram, Slack, Teams┌──────────────▼──────────────────────┐
+
+- **Smart Name Matching** - Auto-map detected names to database people│  Database                            │
+
+- **Confidence Scoring** - High/Medium/Low indicators│  - SQLite (local dev)               │
+
+- **Batch Processing** - Save individual or all entries at once│  - PostgreSQL (production/GCP)      │
+
+└─────────────────────────────────────┘
+
+### 🛠️ Technical Highlights```
+
+- **Modern Stack** - React 19, TypeScript 5, FastAPI, PostgreSQL 14
+
+- **Material-UI** - Beautiful, responsive components### Google Cloud Deployment
+
+- **Path Aliases** - Clean imports (`@services/api`, `@pages/Login`)```
+
+- **Docker Ready** - Backend containerization┌─────────────────────────────────────┐
+
+- **Cloud Native** - Optimized for Google Cloud Run + Cloud SQL│  Cloud Storage + CDN (Frontend)     │
+
+- **Environment Config** - Separate dev/prod settings│  ✓ 5GB storage free                 │
+
+- **Automatic Token Handling** - Axios interceptors│  ✓ 1GB egress free                  │
+
+└─────────────────────────────────────┘
+
+---               │ HTTPS
+
+┌──────────────▼──────────────────────┐
+
+## 🏗️ Architecture│  Cloud Run (Backend API)            │
+
+│  ✓ 2M requests/month free           │
+
+```│  ✓ Auto-scaling 0-10 instances      │
+
+┌────────────────────────────────────────────┐└──────────────┬──────────────────────┘
+
+│  Frontend (React + TypeScript)              │               │ Private Connection
+
+│  Cloud Storage - Static Website Hosting    │┌──────────────▼──────────────────────┐
+
+│  - Material-UI components                  ││  Cloud SQL (PostgreSQL)             │
+
+│  - JWT token management                    ││  ✓ db-f1-micro free tier            │
+
+│  - Smart Identification UI                 ││  ✓ 10GB storage free                │
+
+└────────────────┬───────────────────────────┘└─────────────────────────────────────┘
+
+                 │ HTTPS/REST API```
+
+┌────────────────▼───────────────────────────┐
+
+│  Backend (FastAPI + Python)                │---
+
+│  Cloud Run - Serverless Containers         │
+
+│  - JWT + 2FA authentication                │## 📋 Application Screens
+
+│  - Google Gemini AI integration            │
+
+│  - SQLAlchemy ORM                          │### Dashboard (Log Absence)
+
+└────────────────┬───────────────────────────┘| Field | Type | Options |
+
+                 │ Cloud SQL Proxy|-------|------|---------|
+
+┌────────────────▼───────────────────────────┐| **Person** | Dropdown | From People list (Settings) |
+
+│  Database (PostgreSQL)                     │| **Date** | Date Picker | Any date |
+
+│  Cloud SQL - Managed Database              │| **Duration** | Dropdown | First Half / Second Half / Full |
+
+│  - db-f1-micro (Free Tier)                 │| **Type** | Dropdown | From Leave Types (Settings) |
+
+│  - Automatic backups                       │| **Reason** | Text Area | Free text |
+
+└────────────────────────────────────────────┘
+
+```### Settings
+
+- **People Tab**: Add, edit, delete team members
+
+---- **Leave Types Tab**: Manage leave categories (Annual, Medical, WFH, etc.)
+
+
+
+## 📦 Tech Stack---
+
+
+
+| Layer | Technology | Version |## 🚀 Development Setup
+
+|-------|------------|---------|
+
+| **Frontend** | React | 19.x |### Prerequisites
+
+| | TypeScript | 5.x |- Python 3.11+
+
+| | Material-UI | 6.x |- Node.js 22+
+
+| | Vite | 7.x |- npm 11+
+
+| **Backend** | Python | 3.11+ |
+
+| | FastAPI | Latest |### Backend Setup
+
+| | SQLAlchemy | Latest |```bash
+
+| | Google Gemini AI | Latest |cd backend
+
+| **Database** | PostgreSQL | 14+ |
+
+| | SQLite | (dev only) |# Create virtual environment
+
+| **Hosting** | Google Cloud Run | Serverless |python -m venv venv
+
+| | Cloud SQL | Managed DB |.\venv\Scripts\activate  # Windows
+
+| | Cloud Storage | Static site |source venv/bin/activate  # Mac/Linux
+
+| **Tools** | Docker | Containers |
+
+| | gcloud CLI | Deployment |# Install dependencies
+
+| | VS Code | IDE (F5 debug) |pip install -r requirements.txt
+
+
+
+---# Create .env file
+
 cp .env.example .env
 
+## 📂 Project Structure
+
 # Run server
-uvicorn app.main:app --reload
-# Backend runs at: http://localhost:8000
-```
 
-### Frontend Setup
-```bash
-cd frontend
+```uvicorn app.main:app --reload
 
-# Install dependencies
-npm install
+Leave-tracker-app/# Backend runs at: http://localhost:8000
 
-# Run dev server
-npm run dev
-# Frontend runs at: http://localhost:5173
-```
+├── backend/```
 
-### VS Code Launch (F5)
-Press **F5** to launch both backend and frontend simultaneously!
+│   ├── app/
 
----
+│   │   ├── main.py                    # FastAPI entry point### Frontend Setup
 
-## 📚 Documentation
+│   │   ├── database.py                # Database connection```bash
 
-### Getting Started
-- **[QUICKSTART_ENV.md](./QUICKSTART_ENV.md)** - 3-minute quick start
-- **[SETUP.md](./SETUP.md)** - Complete setup guide
-- **[VERSION_1.0_RELEASE.md](./VERSION_1.0_RELEASE.md)** - Release notes
+│   │   ├── models.py                  # SQLAlchemy modelscd frontend
 
-### Deployment
-- **[QUICK_DEPLOY_GCP.md](./QUICK_DEPLOY_GCP.md)** - One-command deployment ⚡
-- **[GOOGLE_CLOUD_DEPLOYMENT.md](./GOOGLE_CLOUD_DEPLOYMENT.md)** - Full GCP guide
-- **[DEPLOY_SCRIPTS.md](./DEPLOY_SCRIPTS.md)** - Script documentation
+│   │   ├── schemas.py                 # Pydantic schemas
 
-### Configuration
-- **[ENVIRONMENT_CONFIG.md](./ENVIRONMENT_CONFIG.md)** - Environment variables
-- **[CONFIGURATION_SUMMARY.md](./CONFIGURATION_SUMMARY.md)** - Config details
+│   │   ├── core/# Install dependencies
 
-### Architecture
-- **[SECURITY_IMPLEMENTATION.md](./SECURITY_IMPLEMENTATION.md)** - JWT & API service
-- **[frontend/PATH_ALIASES.md](./frontend/PATH_ALIASES.md)** - Import aliases
-- **[JWT_IMPLEMENTATION.md](./JWT_IMPLEMENTATION.md)** - JWT details
+│   │   │   └── security.py            # JWT + encryptionnpm install
 
----
+│   │   ├── api/
 
-## 🔐 Security Features
+│   │   │   ├── auth.py                # Authentication# Run dev server
 
-### Authentication
+│   │   │   ├── people.py              # People CRUDnpm run dev
+
+│   │   │   ├── types.py               # Leave types CRUD# Frontend runs at: http://localhost:5173
+
+│   │   │   ├── absences.py            # Absences CRUD```
+
+│   │   │   └── smart_identification.py # AI parsing
+
+│   │   └── services/### VS Code Launch (F5)
+
+│   ├── DockerfilePress **F5** to launch both backend and frontend simultaneously!
+
+│   └── requirements.txt
+
+│---
+
+├── frontend/
+
+│   ├── src/## 📚 Documentation
+
+│   │   ├── main.tsx                   # React entry point
+
+│   │   ├── App.tsx                    # Main app + routing### Getting Started
+
+│   │   ├── config.ts                  # API configuration- **[QUICKSTART_ENV.md](./QUICKSTART_ENV.md)** - 3-minute quick start
+
+│   │   ├── pages/- **[SETUP.md](./SETUP.md)** - Complete setup guide
+
+│   │   │   ├── Login.tsx- **[VERSION_1.0_RELEASE.md](./VERSION_1.0_RELEASE.md)** - Release notes
+
+│   │   │   ├── Register.tsx
+
+│   │   │   ├── Dashboard.tsx### Deployment
+
+│   │   │   ├── Settings.tsx- **[QUICK_DEPLOY_GCP.md](./QUICK_DEPLOY_GCP.md)** - One-command deployment ⚡
+
+│   │   │   └── SmartIdentification.tsx # AI parsing UI- **[GOOGLE_CLOUD_DEPLOYMENT.md](./GOOGLE_CLOUD_DEPLOYMENT.md)** - Full GCP guide
+
+│   │   └── services/- **[DEPLOY_SCRIPTS.md](./DEPLOY_SCRIPTS.md)** - Script documentation
+
+│   │       └── api.ts                 # API client
+
+│   ├── package.json### Configuration
+
+│   └── vite.config.ts- **[ENVIRONMENT_CONFIG.md](./ENVIRONMENT_CONFIG.md)** - Environment variables
+
+│- **[CONFIGURATION_SUMMARY.md](./CONFIGURATION_SUMMARY.md)** - Config details
+
+├── deploy-frontend.ps1                # Frontend deployment
+
+├── deploy-to-gcp.ps1                  # Full GCP deployment### Architecture
+
+├── DEVELOPER_GUIDE.md                 # Complete documentation- **[SECURITY_IMPLEMENTATION.md](./SECURITY_IMPLEMENTATION.md)** - JWT & API service
+
+└── README.md                          # This file- **[frontend/PATH_ALIASES.md](./frontend/PATH_ALIASES.md)** - Import aliases
+
+```- **[JWT_IMPLEMENTATION.md](./JWT_IMPLEMENTATION.md)** - JWT details
+
+
+
+------
+
+
+
+## 🚀 Getting Started## 🔐 Security Features
+
+
+
+### Prerequisites### Authentication
+
 - **JWT Tokens**: 30-minute expiration with automatic refresh
-- **HTTPBearer**: Secure token transmission
-- **2FA**: TOTP-based (Google Authenticator)
-- **Protected Endpoints**: All APIs require valid JWT
+
+- **Python 3.11+** - Backend runtime- **HTTPBearer**: Secure token transmission
+
+- **Node.js 18+** - Frontend build tool- **2FA**: TOTP-based (Google Authenticator)
+
+- **Google Cloud Account** - For deployment (free tier)- **Protected Endpoints**: All APIs require valid JWT
+
+- **Gemini API Key** - For Smart Identification (free)
 
 ### Password Security
-- **No Database Storage**: Passwords never stored
+
+### 1. Clone Repository- **No Database Storage**: Passwords never stored
+
 - **Custom Encryption**: Username encrypted with password-derived key (Fernet)
-- **Password = Key**: Password acts as encryption key
-- **No Recovery**: Cannot recover password (must recreate user)
 
-### Environment Security
+```powershell- **Password = Key**: Password acts as encryption key
+
+git clone https://github.com/commentors-net/Leave-tracker-app.git- **No Recovery**: Cannot recover password (must recreate user)
+
+cd Leave-tracker-app
+
+```### Environment Security
+
 - **SECRET_KEY**: Randomly generated JWT signing key
-- **Environment Variables**: All secrets in .env (not committed)
+
+### 2. Local Setup- **Environment Variables**: All secrets in .env (not committed)
+
 - **CORS**: Restricted to specific origins
-- **HTTPS**: Enforced in production (Cloud Run)
----
 
-## 💰 Deployment Costs
+**Backend**:- **HTTPS**: Enforced in production (Cloud Run)
 
-### Google Cloud Free Tier
+```powershell---
+
+cd backend
+
+python -m venv venv## 💰 Deployment Costs
+
+.\venv\Scripts\activate
+
+pip install -r requirements.txt### Google Cloud Free Tier
+
 Perfect for small to medium teams (up to 50 users):
 
-| Service | Free Tier | Usage Estimate | Monthly Cost |
-|---------|-----------|----------------|--------------|
-| Cloud Run | 2M requests/month | ~100K requests | **$0** |
-| Cloud SQL | db-f1-micro (1 CPU, 614MB RAM) | Small DB | **$0** |
-| Cloud Storage | 5GB + 1GB egress | Frontend assets | **$0** |
-| Artifact Registry | 0.5GB storage | Docker images | **$0** |
+# Create .env file
+
+@"| Service | Free Tier | Usage Estimate | Monthly Cost |
+
+SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))")|---------|-----------|----------------|--------------|
+
+DATABASE_URL=sqlite:///./database.db| Cloud Run | 2M requests/month | ~100K requests | **$0** |
+
+CORS_ORIGINS=http://localhost:5173| Cloud SQL | db-f1-micro (1 CPU, 614MB RAM) | Small DB | **$0** |
+
+GEMINI_API_KEY=your_key_here| Cloud Storage | 5GB + 1GB egress | Frontend assets | **$0** |
+
+"@ | Out-File -FilePath .env -Encoding utf8| Artifact Registry | 0.5GB storage | Docker images | **$0** |
+
 | **Total** | | | **$0/month** 🎉 |
 
-**Note**: Exceeding free tier limits will incur charges. Set up budget alerts at $5/month.
+uvicorn app.main:app --reload
 
----
+```**Note**: Exceeding free tier limits will incur charges. Set up budget alerts at $5/month.
 
-## 🧪 Testing
+
+
+**Frontend**:---
+
+```powershell
+
+cd frontend## 🧪 Testing
+
+npm install
 
 ### Manual Testing Checklist
-- [ ] Registration with QR code generation
-- [ ] Login with 2FA code from Google Authenticator
-- [ ] JWT token stored in localStorage
-- [ ] Dashboard loads people and types
-- [ ] Log absence successfully
-- [ ] Settings - Add/Edit/Delete person
-- [ ] Settings - Add/Edit/Delete leave type
-- [ ] Logout clears token
-- [ ] 401 error on expired token
-- [ ] Redirect to login when unauthenticated
 
-### API Testing
-```bash
-# Access API docs
-http://localhost:8000/docs
+# Create .env.development- [ ] Registration with QR code generation
+
+@"- [ ] Login with 2FA code from Google Authenticator
+
+VITE_API_URL=http://localhost:8000- [ ] JWT token stored in localStorage
+
+VITE_ENABLE_REGISTRATION=true- [ ] Dashboard loads people and types
+
+"@ | Out-File -FilePath .env.development -Encoding utf8- [ ] Log absence successfully
+
+- [ ] Settings - Add/Edit/Delete person
+
+npm run dev- [ ] Settings - Add/Edit/Delete leave type
+
+```- [ ] Logout clears token
+
+- [ ] 401 error on expired token
+
+### 3. First Time Setup- [ ] Redirect to login when unauthenticated
+
+
+
+1. Go to http://localhost:5173/register### API Testing
+
+2. Create account and scan QR code with Google Authenticator```bash
+
+3. Login with username + password + 2FA code# Access API docs
+
+4. Go to Settings → Add people and leave typeshttp://localhost:8000/docs
+
+5. Test Smart Identification with example conversation
 
 # Test registration
-curl -X POST "http://localhost:8000/auth/register" \
-  -H "Content-Type: application/json" \
-  -d '{"username":"test","password":"password123"}'
 
-# Test login (after scanning QR)
+### 4. Deploy to Google Cloudcurl -X POST "http://localhost:8000/auth/register" \
+
+  -H "Content-Type: application/json" \
+
+See **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** for complete deployment instructions.  -d '{"username":"test","password":"password123"}'
+
+
+
+---# Test login (after scanning QR)
+
 curl -X POST "http://localhost:8000/auth/login" \
-  -H "Content-Type: application/json" \
+
+## 🔐 Security Features  -H "Content-Type: application/json" \
+
   -d '{"username":"test","password":"password123","token":"123456"}'
-```
 
----
+- ✅ **JWT Authentication** - 30-minute token expiration```
 
-## 📊 Project Structure
+- ✅ **2FA (TOTP)** - Google Authenticator integration
 
-```
-Leave-tracker-app/
+- ✅ **Password Encryption** - Username encrypted with password-derived key---
+
+- ✅ **Endpoint Protection** - All API routes require valid JWT
+
+- ✅ **CORS Configuration** - Restricted to frontend domain## 📊 Project Structure
+
+- ✅ **HTTPS Enforced** - Cloud Run provides automatic SSL
+
+- ✅ **SQL Injection Protection** - SQLAlchemy ORM parameterization```
+
+- ✅ **XSS Protection** - React escapes output by defaultLeave-tracker-app/
+
 ├── backend/
-│   ├── .env                    # Environment config (not committed)
+
+---│   ├── .env                    # Environment config (not committed)
+
 │   ├── .env.example            # Environment template
-│   ├── Dockerfile              # Docker configuration
+
+## 💰 Cost Breakdown (Free Tier)│   ├── Dockerfile              # Docker configuration
+
 │   ├── requirements.txt        # Python dependencies
-│   └── app/
-│       ├── main.py             # FastAPI application
-│       ├── database.py         # Database setup
-│       ├── models.py           # SQLAlchemy models
-│       ├── schemas.py          # Pydantic schemas
-│       ├── core/
-│       │   └── security.py     # JWT + encryption
-│       ├── api/
-│       │   ├── auth.py         # Authentication
+
+| Service | Configuration | Free Tier Limit | Monthly Cost |│   └── app/
+
+|---------|---------------|-----------------|--------------|│       ├── main.py             # FastAPI application
+
+| **Cloud Run** | 512Mi RAM, 1 CPU | 2M requests/month | **$0** |│       ├── database.py         # Database setup
+
+| **Cloud SQL** | db-f1-micro, 10GB | 1 instance | **$0** |│       ├── models.py           # SQLAlchemy models
+
+| **Cloud Storage** | Website hosting | 5GB + 1GB egress | **$0** |│       ├── schemas.py          # Pydantic schemas
+
+| **Artifact Registry** | Docker images | 0.5GB | **$0** |│       ├── core/
+
+| **Cloud Build** | Remote builds | 120 min/day | **$0** |│       │   └── security.py     # JWT + encryption
+
+| **Gemini API** | 1.5 Flash | 15 req/min, 1M tokens/day | **$0** |│       ├── api/
+
+| **TOTAL** | Small team usage | All within limits | **$0/month** |│       │   ├── auth.py         # Authentication
+
 │       │   ├── people.py       # People management
-│       │   ├── types.py        # Leave types
+
+---│       │   ├── types.py        # Leave types
+
 │       │   └── absences.py     # Absence logging
-│       └── services/
+
+## 📖 Documentation│       └── services/
+
 │
-├── frontend/
-│   ├── .env.development        # Dev environment
-│   ├── .env.production         # Prod environment
-│   ├── tsconfig.app.json       # TypeScript config
-│   ├── vite.config.ts          # Vite dev config
-│   ├── vite.prod.config.ts     # Vite prod config
-│   └── src/
-│       ├── main.tsx            # Entry point
-│       ├── App.tsx             # Main app component
-│       ├── config.ts           # API configuration
+
+- **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Complete guide (2000+ lines)├── frontend/
+
+  - Architecture & data flow│   ├── .env.development        # Dev environment
+
+  - Local development setup│   ├── .env.production         # Prod environment
+
+  - Feature implementation details│   ├── tsconfig.app.json       # TypeScript config
+
+  - Security best practices│   ├── vite.config.ts          # Vite dev config
+
+  - Complete API reference│   ├── vite.prod.config.ts     # Vite prod config
+
+  - Google Cloud deployment (step-by-step)│   └── src/
+
+  - Configuration management│       ├── main.tsx            # Entry point
+
+  - Troubleshooting guide│       ├── App.tsx             # Main app component
+
+  - Maintenance & updates│       ├── config.ts           # API configuration
+
 │       ├── services/
-│       │   └── api.ts          # API service layer
+
+---│       │   └── api.ts          # API service layer
+
 │       └── pages/
-│           ├── Login.tsx       # Login page
+
+## 🤝 Contributing│           ├── Login.tsx       # Login page
+
 │           ├── Register.tsx    # Registration page
-│           ├── Dashboard.tsx   # Log absence form
-│           └── Settings.tsx    # People & types management
+
+1. Fork the repository│           ├── Dashboard.tsx   # Log absence form
+
+2. Create feature branch (`git checkout -b feature/amazing-feature`)│           └── Settings.tsx    # People & types management
+
+3. Commit changes (`git commit -m 'Add amazing feature'`)│
+
+4. Push to branch (`git push origin feature/amazing-feature`)├── .vscode/
+
+5. Open Pull Request│   └── launch.json             # F5 launch config
+
 │
-├── .vscode/
-│   └── launch.json             # F5 launch config
-│
-├── deploy-to-gcp.ps1           # Deployment script
+
+---├── deploy-to-gcp.ps1           # Deployment script
+
 ├── README.md                   # This file
-├── QUICK_DEPLOY_GCP.md         # Quick deployment guide
+
+## 📝 License├── QUICK_DEPLOY_GCP.md         # Quick deployment guide
+
 ├── GOOGLE_CLOUD_DEPLOYMENT.md  # Full deployment guide
-└── VERSION_1.0_RELEASE.md      # Release notes
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.└── VERSION_1.0_RELEASE.md      # Release notes
+
 ```
 
 ---
+
+---
+
+## 🔗 Links
 
 ## 🔄 Updating the Application
 
-### Local Updates
-```bash
-# Make code changes
+- **Live Demo**: https://storage.googleapis.com/leave-tracker-2025-frontend/index.html
+
+- **API Docs**: https://leave-tracker-api-427212681311.us-central1.run.app/docs### Local Updates
+
+- **Google Cloud Console**: https://console.cloud.google.com/home/dashboard?project=leave-tracker-2025```bash
+
+- **Gemini API**: https://makersuite.google.com/app/apikey# Make code changes
+
 git add .
-git commit -m "Updated feature X"
+
+---git commit -m "Updated feature X"
+
 git push
-```
 
-### Deploy Updates to Google Cloud
-```powershell
-# Rebuild and deploy (increments version)
-.\deploy-to-gcp.ps1 `
-    -ProjectId "your-project-id" `
+## 📞 Support```
+
+
+
+For detailed help, see **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** sections:### Deploy Updates to Google Cloud
+
+- **Troubleshooting** - Common issues and solutions```powershell
+
+- **Configuration** - Environment variables guide# Rebuild and deploy (increments version)
+
+- **API Reference** - Complete endpoint documentation.\deploy-to-gcp.ps1 `
+
+- **Deployment** - Step-by-step GCP setup    -ProjectId "your-project-id" `
+
     -SecretKey "your-secret-key" `
-    -DbPassword "your-db-password" `
-    -Version "v1.0.1"
-```
 
----
+---    -DbPassword "your-db-password" `
+
+    -Version "v1.0.1"
+
+**Version**: 1.1.0  ```
+
+**Last Updated**: November 2, 2025  
+
+**Status**: ✅ Production Ready---
+
 
 ## 🐛 Troubleshooting
 

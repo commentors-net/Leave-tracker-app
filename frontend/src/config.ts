@@ -18,6 +18,10 @@ export const config = {
     people: `${API_URL}/api/people`,
     types: `${API_URL}/api/types`,
     absences: `${API_URL}/api/absences`,
+    smartIdentification: `${API_URL}/api/smart-identify`,
+    smartIdentificationHealth: `${API_URL}/api/smart-identify/health`,
+    aiInstructions: `${API_URL}/api/ai-instructions`,
+    aiInstructionsReset: `${API_URL}/api/ai-instructions/reset`,
   },
 };
 

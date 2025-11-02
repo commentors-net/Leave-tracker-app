@@ -5,6 +5,8 @@ import Login from '@pages/Login';
 import Register from '@pages/Register';
 import Dashboard from '@pages/Dashboard';
 import Settings from '@pages/Settings';
+import SmartIdentification from '@pages/SmartIdentification';
+import Reports from '@pages/Reports';
 import config from '@/config';
 
 function AppContent() {
@@ -59,6 +61,12 @@ function AppContent() {
               <Button color="inherit" component={Link} to="/dashboard">
                 Dashboard
               </Button>
+              <Button color="inherit" component={Link} to="/reports">
+                Reports
+              </Button>
+              <Button color="inherit" component={Link} to="/smart-identification">
+                Smart Identification
+              </Button>
               <Button color="inherit" component={Link} to="/settings">
                 Settings
               </Button>
@@ -95,6 +103,8 @@ function AppContent() {
             } 
           />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/smart-identification" element={<SmartIdentification />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </Container>

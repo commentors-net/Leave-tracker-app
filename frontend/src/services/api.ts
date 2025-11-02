@@ -168,6 +168,7 @@ export interface Absence {
   duration: string;
   type_id: number;
   reason: string;
+  applied: number;
 }
 
 export interface AbsenceCreate {
@@ -176,16 +177,137 @@ export interface AbsenceCreate {
   duration: string;
   type_id: number;
   reason: string;
+  applied?: number;
+}
+
+export interface AbsenceUpdate {
+  applied: number;
+}
+
+export interface AbsencesFilterParams {
+  person_id?: number;
+  type_id?: number;
+  date_from?: string;
+  date_to?: string;
+  skip?: number;
+  limit?: number;
 }
 
 export const absencesApi = {
-  getAll: async (): Promise<Absence[]> => {
-    const response = await apiClient.get(config.endpoints.absences);
+  getAll: async (params?: AbsencesFilterParams): Promise<Absence[]> => {
+    const queryParams = new URLSearchParams();
+    if (params?.person_id) queryParams.append('person_id', params.person_id.toString());
+    if (params?.type_id) queryParams.append('type_id', params.type_id.toString());
+    if (params?.date_from) queryParams.append('date_from', params.date_from);
+    if (params?.date_to) queryParams.append('date_to', params.date_to);
+    if (params?.skip) queryParams.append('skip', params.skip.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    
+    const url = queryParams.toString() 
+      ? `${config.endpoints.absences}?${queryParams.toString()}`
+      : config.endpoints.absences;
+    
+    const response = await apiClient.get(url);
     return response.data;
   },
 
   create: async (data: AbsenceCreate): Promise<Absence> => {
     const response = await apiClient.post(config.endpoints.absences, data);
+    return response.data;
+  },
+
+  update: async (id: number, data: AbsenceUpdate): Promise<Absence> => {
+    const response = await apiClient.patch(`${config.endpoints.absences}/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: number): Promise<{ message: string }> => {
+    const response = await apiClient.delete(`${config.endpoints.absences}/${id}`);
+    return response.data;
+  },
+
+  bulkDelete: async (ids: number[]): Promise<{ message: string }> => {
+    const response = await apiClient.post(`${config.endpoints.absences}/bulk-delete`, ids);
+    return response.data;
+  },
+
+  bulkUpdateApplied: async (ids: number[], applied: number): Promise<{ message: string }> => {
+    const response = await apiClient.post(`${config.endpoints.absences}/bulk-update-applied`, {
+      ids,
+      applied
+    });
+    return response.data;
+  },
+};
+
+// ============================================
+// Smart Identification API
+// ============================================
+
+export interface ParsedLeaveEntry {
+  person_name: string;
+  date: string;
+  leave_type: string;
+  reason: string;
+  confidence: string;
+}
+
+export interface SmartIdentificationRequest {
+  conversation: string;
+}
+
+export interface SmartIdentificationResponse {
+  entries: ParsedLeaveEntry[];
+  raw_analysis: string;
+}
+
+export interface SmartIdentificationHealth {
+  status: string;
+  message: string;
+  configured: boolean;
+  model?: string;
+}
+
+export const smartIdentificationApi = {
+  analyze: async (data: SmartIdentificationRequest): Promise<SmartIdentificationResponse> => {
+    const response = await apiClient.post(config.endpoints.smartIdentification, data);
+    return response.data;
+  },
+
+  checkHealth: async (): Promise<SmartIdentificationHealth> => {
+    const response = await apiClient.get(config.endpoints.smartIdentificationHealth);
+    return response.data;
+  },
+};
+
+// ============================================
+// AI Instructions API
+// ============================================
+
+export interface AIInstructions {
+  id: number;
+  instructions: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AIInstructionsUpdate {
+  instructions: string;
+}
+
+export const aiInstructionsApi = {
+  get: async (): Promise<AIInstructions> => {
+    const response = await apiClient.get(config.endpoints.aiInstructions);
+    return response.data;
+  },
+
+  update: async (data: AIInstructionsUpdate): Promise<AIInstructions> => {
+    const response = await apiClient.put(config.endpoints.aiInstructions, data);
+    return response.data;
+  },
+
+  reset: async (): Promise<AIInstructions> => {
+    const response = await apiClient.post(config.endpoints.aiInstructionsReset);
     return response.data;
   },
 };

@@ -16,11 +16,14 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { peopleApi, typesApi } from "@services/api";
-import type { Person, LeaveType } from "@services/api";
+import RestoreIcon from "@mui/icons-material/Restore";
+import { peopleApi, typesApi, aiInstructionsApi } from "@services/api";
+import type { Person, LeaveType, AIInstructions } from "@services/api";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -53,10 +56,28 @@ export default function Settings() {
   const [editItem, setEditItem] = useState<any>(null);
   const [editName, setEditName] = useState("");
   const [editType, setEditType] = useState<"person" | "type">("person");
+  
+  // AI Instructions state
+  const [aiInstructions, setAiInstructions] = useState<AIInstructions | null>(null);
+  const [aiInstructionsText, setAiInstructionsText] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiSuccess, setAiSuccess] = useState(false);
+  const [aiError, setAiError] = useState("");
 
   useEffect(() => {
     fetchData();
+    fetchAiInstructions();
   }, []);
+
+  const fetchAiInstructions = async () => {
+    try {
+      const data = await aiInstructionsApi.get();
+      setAiInstructions(data);
+      setAiInstructionsText(data.instructions);
+    } catch (err) {
+      console.error("Failed to fetch AI instructions", err);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -136,12 +157,46 @@ export default function Settings() {
     }
   };
 
+  const handleSaveAiInstructions = async () => {
+    setAiLoading(true);
+    setAiError("");
+    setAiSuccess(false);
+    try {
+      const updated = await aiInstructionsApi.update({ instructions: aiInstructionsText });
+      setAiInstructions(updated);
+      setAiSuccess(true);
+      setTimeout(() => setAiSuccess(false), 3000);
+    } catch (err) {
+      setAiError("Failed to save AI instructions");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleResetAiInstructions = async () => {
+    if (!confirm("Are you sure you want to reset to default AI instructions?")) return;
+    setAiLoading(true);
+    setAiError("");
+    try {
+      const reset = await aiInstructionsApi.reset();
+      setAiInstructions(reset);
+      setAiInstructionsText(reset.instructions);
+      setAiSuccess(true);
+      setTimeout(() => setAiSuccess(false), 3000);
+    } catch (err) {
+      setAiError("Failed to reset AI instructions");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   return (
     <Card sx={{ mt: 4, mx: "auto", maxWidth: 800 }}>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="settings tabs">
           <Tab label="People" />
           <Tab label="Leave Types" />
+          <Tab label="AI Instructions" />
         </Tabs>
       </Box>
       
@@ -244,6 +299,69 @@ export default function Settings() {
             ))
           )}
         </List>
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={2}>
+        <Typography variant="h6" gutterBottom>
+          AI Instructions for Smart Identification
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Customize how the AI interprets chat conversations when extracting leave information.
+          These instructions control what gets detected and how it's categorized.
+        </Typography>
+        
+        {aiError && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setAiError("")}>
+            {aiError}
+          </Alert>
+        )}
+        
+        {aiSuccess && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            AI instructions saved successfully!
+          </Alert>
+        )}
+
+        <TextField
+          multiline
+          rows={15}
+          fullWidth
+          value={aiInstructionsText}
+          onChange={(e) => setAiInstructionsText(e.target.value)}
+          placeholder="Enter AI instructions..."
+          sx={{ 
+            mb: 2,
+            fontFamily: 'monospace',
+            '& textarea': {
+              fontFamily: 'monospace',
+              fontSize: '13px',
+            }
+          }}
+        />
+        
+        <Box sx={{ display: "flex", gap: 2, justifyContent: "space-between" }}>
+          <Button
+            variant="outlined"
+            startIcon={<RestoreIcon />}
+            onClick={handleResetAiInstructions}
+            disabled={aiLoading}
+          >
+            Reset to Default
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSaveAiInstructions}
+            disabled={aiLoading}
+          >
+            {aiLoading ? <CircularProgress size={24} /> : "Save Instructions"}
+          </Button>
+        </Box>
+        
+        {aiInstructions && (
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: "block" }}>
+            Last updated: {new Date(aiInstructions.updated_at).toLocaleString()}
+          </Typography>
+        )}
       </TabPanel>
 
       {/* Edit Dialog */}

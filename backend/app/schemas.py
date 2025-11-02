@@ -42,10 +42,14 @@ class AbsenceBase(BaseModel):
     person_id: int
 
 class AbsenceCreate(AbsenceBase):
-    pass
+    applied: int = 0
+
+class AbsenceUpdate(BaseModel):
+    applied: int
 
 class Absence(AbsenceBase):
     id: int
+    applied: int = 0
 
     class Config:
         from_attributes = True
@@ -70,6 +74,39 @@ class TypeCreate(TypeBase):
 
 class Type(TypeBase):
     id: int
+
+    class Config:
+        from_attributes = True
+
+# Smart Identification Schemas
+class SmartIdentificationRequest(BaseModel):
+    conversation: str
+
+class ParsedLeaveEntry(BaseModel):
+    person_name: str
+    date: str
+    leave_type: str
+    reason: str
+    confidence: str
+
+class SmartIdentificationResponse(BaseModel):
+    entries: list[ParsedLeaveEntry]
+    raw_analysis: str
+
+# AI Instructions Schemas
+class AIInstructionsBase(BaseModel):
+    instructions: str
+
+class AIInstructionsCreate(AIInstructionsBase):
+    pass
+
+class AIInstructionsUpdate(AIInstructionsBase):
+    pass
+
+class AIInstructions(AIInstructionsBase):
+    id: int
+    created_at: str
+    updated_at: str
 
     class Config:
         from_attributes = True
