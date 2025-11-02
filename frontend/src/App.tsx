@@ -1,10 +1,11 @@
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Container, Button } from '@mui/material';
 import { useState, useEffect } from 'react';
 import Login from '@pages/Login';
 import Register from '@pages/Register';
 import Dashboard from '@pages/Dashboard';
 import Settings from '@pages/Settings';
+import config from '@/config';
 
 function AppContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -70,9 +71,11 @@ function AppContent() {
               <Button color="inherit" component={Link} to="/login">
                 Login
               </Button>
-              <Button color="inherit" component={Link} to="/register">
-                Register
-              </Button>
+              {config.features.enableRegistration && (
+                <Button color="inherit" component={Link} to="/register">
+                  Register
+                </Button>
+              )}
             </>
           )}
         </Toolbar>
@@ -81,7 +84,16 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route 
+            path="/register" 
+            element={
+              config.features.enableRegistration ? (
+                <Register />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            } 
+          />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>

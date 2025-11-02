@@ -3,6 +3,12 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export const config = {
   apiUrl: API_URL,
+  // Feature toggles
+  features: {
+    // Set to true to enable public registration
+    // Set to false to disable registration link and route access
+    enableRegistration: import.meta.env.VITE_ENABLE_REGISTRATION === 'true' || false,
+  },
   endpoints: {
     auth: {
       register: `${API_URL}/auth/register`,

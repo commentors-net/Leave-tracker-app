@@ -61,3 +61,4 @@ htmlcov/
 
 # Docker
 *.dockerignore
+REGISTRATION_CONTROL.md
