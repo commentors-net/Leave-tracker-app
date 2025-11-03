@@ -48,6 +48,11 @@ class FirestoreDB:
             return {"id": user.id, **user.to_dict()}
         return None
     
+    def update_user_password(self, user_id: str, new_password: str):
+        """Update user password"""
+        user_ref = self.db.collection(self.USERS).document(user_id)
+        user_ref.update({"password": new_password})
+    
     # ==================== AI INSTRUCTIONS ====================
     
     def get_ai_instructions(self) -> Optional[Dict[str, Any]]:

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
 from .. import schemas
-from ..firestore_db import firestore_db
+from ..db_factory import db
 from ..core.security import get_current_user
 
 router = APIRouter()
@@ -29,11 +29,11 @@ async def get_ai_instructions(
     current_user: str = Depends(get_current_user)
 ):
     """Get current AI instructions for Smart Identification"""
-    instructions = firestore_db.get_ai_instructions()
+    instructions = db.get_ai_instructions()
     
     if not instructions:
         # Create default instructions if none exist
-        instructions = firestore_db.create_ai_instructions(DEFAULT_INSTRUCTIONS)
+        instructions = db.create_ai_instructions(DEFAULT_INSTRUCTIONS)
     
     return instructions
 
@@ -43,14 +43,14 @@ async def update_ai_instructions(
     current_user: str = Depends(get_current_user)
 ):
     """Update AI instructions for Smart Identification"""
-    instructions = firestore_db.get_ai_instructions()
+    instructions = db.get_ai_instructions()
     
     if not instructions:
         # Create if doesn't exist
-        instructions = firestore_db.create_ai_instructions(request.instructions)
+        instructions = db.create_ai_instructions(request.instructions)
     else:
         # Update existing
-        instructions = firestore_db.update_ai_instructions(instructions["id"], request.instructions)
+        instructions = db.update_ai_instructions(instructions["id"], request.instructions)
     
     return instructions
 
@@ -59,11 +59,11 @@ async def reset_ai_instructions(
     current_user: str = Depends(get_current_user)
 ):
     """Reset AI instructions to default"""
-    instructions = firestore_db.get_ai_instructions()
+    instructions = db.get_ai_instructions()
     
     if not instructions:
-        instructions = firestore_db.create_ai_instructions(DEFAULT_INSTRUCTIONS)
+        instructions = db.create_ai_instructions(DEFAULT_INSTRUCTIONS)
     else:
-        instructions = firestore_db.update_ai_instructions(instructions["id"], DEFAULT_INSTRUCTIONS)
+        instructions = db.update_ai_instructions(instructions["id"], DEFAULT_INSTRUCTIONS)
     
     return instructions

@@ -1,7 +1,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from .. import schemas
-from ..firestore_db import firestore_db
+from ..db_factory import db
 from ..core.security import get_current_user
 
 router = APIRouter()
@@ -12,7 +12,7 @@ def read_people(
     limit: int = 100,
     current_user: str = Depends(get_current_user)
 ):
-    people = firestore_db.get_all_people()
+    people = db.get_all_people()
     # Apply pagination
     return people[skip:skip+limit]
 
@@ -21,7 +21,7 @@ def create_people(
     people: schemas.PeopleCreate,
     current_user: str = Depends(get_current_user)
 ):
-    person = firestore_db.create_person(people.name)
+    person = db.create_person(people.name)
     return person
 
 @router.put("/people/{people_id}", response_model=schemas.People)
@@ -30,10 +30,10 @@ def update_people(
     people: schemas.PeopleCreate,
     current_user: str = Depends(get_current_user)
 ):
-    person = firestore_db.get_person_by_id(people_id)
+    person = db.get_person_by_id(people_id)
     if not person:
         raise HTTPException(status_code=404, detail="Person not found")
-    updated_person = firestore_db.update_person(people_id, people.name)
+    updated_person = db.update_person(people_id, people.name)
     return updated_person
 
 @router.delete("/people/{people_id}")
@@ -41,8 +41,8 @@ def delete_people(
     people_id: str,
     current_user: str = Depends(get_current_user)
 ):
-    person = firestore_db.get_person_by_id(people_id)
+    person = db.get_person_by_id(people_id)
     if not person:
         raise HTTPException(status_code=404, detail="Person not found")
-    firestore_db.delete_person(people_id)
+    db.delete_person(people_id)
     return {"message": "Person deleted successfully"}

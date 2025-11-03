@@ -9,7 +9,7 @@ class UserCreate(UserBase):
     password: str
 
 class User(UserBase):
-    id: int
+    id: str
 
     class Config:
         from_attributes = True
@@ -27,7 +27,7 @@ class RegisterResponse(BaseModel):
     qr: str
     secret: str
     username: str
-    id: int
+    id: str
 
 class PasswordChange(BaseModel):
     username: str
@@ -38,8 +38,8 @@ class AbsenceBase(BaseModel):
     date: date
     duration: str
     reason: str
-    type_id: int
-    person_id: int
+    type_id: str
+    person_id: str
 
 class AbsenceCreate(AbsenceBase):
     applied: int = 0
@@ -48,7 +48,7 @@ class AbsenceUpdate(BaseModel):
     applied: int
 
 class Absence(AbsenceBase):
-    id: int
+    id: str
     applied: int = 0
 
     class Config:
@@ -61,7 +61,7 @@ class PeopleCreate(PeopleBase):
     pass
 
 class People(PeopleBase):
-    id: int
+    id: str
 
     class Config:
         from_attributes = True
@@ -73,7 +73,7 @@ class TypeCreate(TypeBase):
     pass
 
 class Type(TypeBase):
-    id: int
+    id: str
 
     class Config:
         from_attributes = True
@@ -104,7 +104,7 @@ class AIInstructionsUpdate(AIInstructionsBase):
     pass
 
 class AIInstructions(AIInstructionsBase):
-    id: int
+    id: str
     created_at: str
     updated_at: str
 

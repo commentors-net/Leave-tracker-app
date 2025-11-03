@@ -20,6 +20,7 @@ backend/*-key.json
 # Data export files
 backend/data_export.json
 backend/id_mapping.json
+backend/local_dev_data.json
 
 # Keep example environment files
 !.env.example

@@ -5,7 +5,7 @@ import json
 import re
 from datetime import datetime
 from .. import schemas
-from ..firestore_db import firestore_db
+from ..db_factory import db
 from ..core.security import get_current_user
 
 router = APIRouter()
@@ -38,11 +38,11 @@ async def smart_identify_leaves(
     
     try:
         # Get all people and leave types from Firestore for context
-        people = firestore_db.get_all_people()
-        leave_types = firestore_db.get_all_types()
+        people = db.get_all_people()
+        leave_types = db.get_all_types()
         
         # Get AI instructions from Firestore
-        ai_instructions = firestore_db.get_ai_instructions()
+        ai_instructions = db.get_ai_instructions()
         if ai_instructions:
             rules_text = ai_instructions["instructions"]
         else:
@@ -67,8 +67,8 @@ async def smart_identify_leaves(
         people_names = [p["name"] for p in people] if people else []
         leave_type_names = [t["name"] for t in leave_types] if leave_types else []
         
-        # Initialize Gemini model (use the latest stable flash model)
-        model = genai.GenerativeModel('gemini-2.0-flash')
+        # Initialize Gemini model (use gemini-2.0-flash-exp)
+        model = genai.GenerativeModel('gemini-2.0-flash-exp')
         
         # Create the prompt
         prompt = f"""
@@ -110,7 +110,7 @@ OUTPUT FORMAT (JSON):
 Return ONLY valid JSON, no additional text.
 """
         
-        # Call Gemini API
+        # Call Gemini API with gemini-2.0-flash-exp model
         response = model.generate_content(prompt)
         response_text = response.text.strip()
         
@@ -160,14 +160,14 @@ async def check_smart_identify_health(current_user: str = Depends(get_current_us
         }
     
     try:
-        # Try a simple test call (use the latest stable flash model)
-        model = genai.GenerativeModel('gemini-2.0-flash')
+        # Try a simple test call (use gemini-2.0-flash-exp)
+        model = genai.GenerativeModel('gemini-2.0-flash-exp')
         response = model.generate_content("Say 'OK' if you can read this.")
         return {
             "status": "success",
             "message": "Gemini API is configured and working",
             "configured": True,
-            "model": "gemini-2.0-flash"
+            "model": "gemini-2.0-flash-exp"
         }
     except Exception as e:
         return {

@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 import pyotp, qrcode, io, base64
+import os
 from datetime import timedelta
 from .. import schemas
-from ..firestore_db import firestore_db
+from ..db_factory import db
 from ..core.security import (
     encrypt_username_with_password, 
     verify_password, 
@@ -16,7 +17,7 @@ router = APIRouter()
 @router.post("/register", response_model=schemas.RegisterResponse)
 def register(data: schemas.UserCreate):
     # Check if user already exists
-    existing_user = firestore_db.get_user_by_username(data.username)
+    existing_user = db.get_user_by_username(data.username)
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     
@@ -24,7 +25,7 @@ def register(data: schemas.UserCreate):
     encrypted_password = encrypt_username_with_password(data.username, data.password)
     
     secret = pyotp.random_base32()
-    user = firestore_db.create_user(data.username, encrypted_password, secret)
+    user = db.create_user(data.username, encrypted_password, secret)
 
     otp_uri = pyotp.totp.TOTP(secret).provisioning_uri(name=data.username, issuer_name="TeamTracker")
     qr = qrcode.make(otp_uri)
@@ -35,7 +36,7 @@ def register(data: schemas.UserCreate):
 
 @router.post("/login")
 def login(data: schemas.TokenData):
-    user = firestore_db.get_user_by_username(data.username)
+    user = db.get_user_by_username(data.username)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -43,10 +44,17 @@ def login(data: schemas.TokenData):
     if not verify_password(data.username, data.password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    # Verify 2FA token
-    totp = pyotp.TOTP(user["otp_secret"])
-    if not totp.verify(data.token):
-        raise HTTPException(status_code=401, detail="Invalid token")
+    # Check if running in development mode (bypass 2FA for localhost)
+    is_dev_mode = os.getenv("ENVIRONMENT", "production").lower() == "development"
+    
+    if is_dev_mode:
+        # Skip 2FA verification in development mode
+        pass
+    else:
+        # Verify 2FA token in production
+        totp = pyotp.TOTP(user["otp_secret"])
+        if not totp.verify(data.token):
+            raise HTTPException(status_code=401, detail="Invalid token")
     
     # Create JWT access token
     access_token = create_access_token(
@@ -67,7 +75,7 @@ def change_user_password(data: schemas.PasswordChange):
     Change user password. Requires old password verification.
     Since password is used as encryption key, we re-encrypt with new password.
     """
-    user = firestore_db.get_user_by_username(data.username)
+    user = db.get_user_by_username(data.username)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -79,10 +87,8 @@ def change_user_password(data: schemas.PasswordChange):
             data.new_password, 
             user["password"]
         )
-        # Update user in Firestore
-        from google.cloud import firestore
-        db = firestore.Client(project="leave-tracker-2025")
-        db.collection("users").document(user["id"]).update({"password": new_encrypted})
+        # Update user password in database
+        db.update_user_password(user["id"], new_encrypted)
         return {"success": True, "message": "Password changed successfully"}
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
