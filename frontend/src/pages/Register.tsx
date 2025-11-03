@@ -26,13 +26,13 @@ export default function Register() {
   };
 
   return (
-    <Card sx={{ p: 4, width: 400, mx: "auto", mt: 10 }}>
-      <Typography variant="h6">Register</Typography>
+    <Card sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: 500, width: '100%', mx: "auto", mt: { xs: 4, sm: 6, md: 10 } }}>
+      <Typography variant="h6" sx={{ mb: 2 }}>Register</Typography>
       {!qrCode ? (
         <>
           <TextField label="Username" value={username} onChange={e => setUsername(e.target.value)} fullWidth margin="normal" />
           <TextField label="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} fullWidth margin="normal" />
-          <Button variant="contained" fullWidth onClick={handleRegister}>Register</Button>
+          <Button variant="contained" fullWidth onClick={handleRegister} sx={{ mt: 2 }}>Register</Button>
         </>
       ) : (
         <Box sx={{ textAlign: "center" }}>
@@ -40,7 +40,7 @@ export default function Register() {
             Scan this QR code with Google Authenticator or similar app:
           </Typography>
           <img src={`data:image/png;base64,${qrCode}`} alt="QR Code" style={{ maxWidth: "100%" }} />
-          <Typography variant="body2" sx={{ mt: 2, mb: 2, wordBreak: "break-all" }}>
+          <Typography variant="body2" sx={{ mt: 2, mb: 2, wordBreak: "break-all", px: { xs: 1, sm: 0 } }}>
             Secret Key: <strong>{secret}</strong>
           </Typography>
           <Button variant="contained" fullWidth onClick={handleContinueToLogin} sx={{ mt: 2 }}>

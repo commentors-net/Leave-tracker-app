@@ -226,7 +226,7 @@ Will rest for the rest of the day / go to clinic
 [1:56 PM, 10/31/2025] Charif Seb: Thanks`;
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
       <Typography variant="h4" sx={{ mb: 3 }}>
         Smart Identification
       </Typography>
@@ -243,7 +243,7 @@ Will rest for the rest of the day / go to clinic
         </Alert>
       )}
 
-      <Card sx={{ p: 3, mb: 3 }}>
+      <Card sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
           Paste Chat Conversation
         </Typography>
@@ -300,8 +300,8 @@ Will rest for the rest of the day / go to clinic
       )}
 
       {parsedEntries.length > 0 && (
-        <Card sx={{ p: 3 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        <Card sx={{ p: { xs: 2, sm: 3 } }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2, flexWrap: "wrap", gap: 2 }}>
             <Typography variant="h6">
               Identified Leave Requests ({parsedEntries.length})
             </Typography>
@@ -310,12 +310,13 @@ Will rest for the rest of the day / go to clinic
               color="primary"
               onClick={handleSaveAll}
               disabled={parsedEntries.length === 0}
+              sx={{ minWidth: { xs: "100%", sm: "auto" } }}
             >
               Save All
             </Button>
           </Box>
 
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
             <Table>
               <TableHead>
                 <TableRow>

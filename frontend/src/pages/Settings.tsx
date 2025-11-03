@@ -41,7 +41,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`settings-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <Box sx={{ p: { xs: 2, sm: 3 } }}>{children}</Box>}
     </div>
   );
 }
@@ -191,13 +191,20 @@ export default function Settings() {
   };
 
   return (
-    <Card sx={{ mt: 4, mx: "auto", maxWidth: 800 }}>
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Tabs value={tabValue} onChange={handleTabChange} aria-label="settings tabs">
-          <Tab label="People" />
-          <Tab label="Leave Types" />
-          <Tab label="AI Instructions" />
-        </Tabs>
+    <Box sx={{ mt: { xs: 2, sm: 4 }, mx: "auto", maxWidth: 900, px: { xs: 2, sm: 3 } }}>
+      <Card>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs 
+            value={tabValue} 
+            onChange={handleTabChange} 
+            aria-label="settings tabs"
+            variant="scrollable"
+            scrollButtons="auto"
+          >
+            <Tab label="People" />
+            <Tab label="Leave Types" />
+            <Tab label="AI Instructions" />
+          </Tabs>
       </Box>
       
       <TabPanel value={tabValue} index={0}>
@@ -384,6 +391,7 @@ export default function Settings() {
           <Button onClick={handleEditSave} variant="contained">Save</Button>
         </DialogActions>
       </Dialog>
-    </Card>
+      </Card>
+    </Box>
   );
 }

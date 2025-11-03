@@ -202,7 +202,7 @@ export default function Reports() {
   const someSelected = selectedIds.size > 0 && selectedIds.size < absences.length;
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
       <Typography variant="h4" sx={{ mb: 3 }}>
         Reports
       </Typography>
@@ -220,13 +220,13 @@ export default function Reports() {
       )}
 
       {/* Filters */}
-      <Card sx={{ p: 3, mb: 3 }}>
+      <Card sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <FilterListIcon sx={{ mr: 1 }} />
           <Typography variant="h6">Filters</Typography>
         </Box>
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-          <FormControl sx={{ minWidth: 200 }}>
+          <FormControl sx={{ minWidth: { xs: "100%", sm: 200 } }}>
             <InputLabel>Person</InputLabel>
             <Select
               value={selectedPerson}
@@ -242,7 +242,7 @@ export default function Reports() {
             </Select>
           </FormControl>
 
-          <FormControl sx={{ minWidth: 200 }}>
+          <FormControl sx={{ minWidth: { xs: "100%", sm: 200 } }}>
             <InputLabel>Leave Type</InputLabel>
             <Select
               value={selectedType}
@@ -264,7 +264,7 @@ export default function Reports() {
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
             InputLabelProps={{ shrink: true }}
-            sx={{ minWidth: 180 }}
+            sx={{ minWidth: { xs: "100%", sm: 180 } }}
           />
 
           <TextField
@@ -273,13 +273,13 @@ export default function Reports() {
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
             InputLabelProps={{ shrink: true }}
-            sx={{ minWidth: 180 }}
+            sx={{ minWidth: { xs: "100%", sm: 180 } }}
           />
 
           <Button
             variant="outlined"
             onClick={clearFilters}
-            sx={{ height: 56 }}
+            sx={{ height: 56, minWidth: { xs: "100%", sm: "auto" } }}
           >
             Clear Filters
           </Button>
@@ -289,7 +289,7 @@ export default function Reports() {
       {/* Bulk Actions */}
       {selectedIds.size > 0 && (
         <Card sx={{ p: 2, mb: 2, bgcolor: "primary.light" }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
             <Typography variant="body1" sx={{ color: "primary.contrastText" }}>
               {selectedIds.size} record(s) selected
             </Typography>
@@ -298,6 +298,7 @@ export default function Reports() {
               color="success"
               size="small"
               onClick={() => handleBulkUpdateApplied(1)}
+              sx={{ minWidth: { xs: "100%", sm: "auto" } }}
             >
               Mark as Applied
             </Button>
@@ -306,6 +307,7 @@ export default function Reports() {
               color="warning"
               size="small"
               onClick={() => handleBulkUpdateApplied(0)}
+              sx={{ minWidth: { xs: "100%", sm: "auto" } }}
             >
               Mark as Not Applied
             </Button>
@@ -315,6 +317,7 @@ export default function Reports() {
               size="small"
               startIcon={<DeleteIcon />}
               onClick={handleBulkDelete}
+              sx={{ minWidth: { xs: "100%", sm: "auto" } }}
             >
               Delete Selected
             </Button>
@@ -323,7 +326,7 @@ export default function Reports() {
       )}
 
       {/* Results Table */}
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
         <Table>
           <TableHead>
             <TableRow>

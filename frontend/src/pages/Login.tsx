@@ -31,8 +31,8 @@ export default function Login() {
   };
 
   return (
-    <Card sx={{ p: 4, width: 300, mx: "auto", mt: 10 }}>
-      <Typography variant="h6">2FA Login</Typography>
+    <Card sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: 400, width: '100%', mx: "auto", mt: { xs: 4, sm: 6, md: 10 } }}>
+      <Typography variant="h6" sx={{ mb: 2 }}>2FA Login</Typography>
       <TextField label="Username" value={username} onChange={e => setUsername(e.target.value)} fullWidth margin="normal" />
       <TextField 
         label="Password" 
@@ -43,7 +43,7 @@ export default function Login() {
         margin="normal" 
       />
       <TextField label="2FA Token" value={token} onChange={e => setToken(e.target.value)} fullWidth margin="normal" />
-      <Button variant="contained" fullWidth onClick={handleLogin}>Login</Button>
+      <Button variant="contained" fullWidth onClick={handleLogin} sx={{ mt: 2 }}>Login</Button>
     </Card>
   );
 }

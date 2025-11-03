@@ -1,5 +1,21 @@
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Container, Button } from '@mui/material';
+import { 
+  AppBar, 
+  Toolbar, 
+  Typography, 
+  Container, 
+  Button, 
+  IconButton, 
+  Drawer, 
+  List, 
+  ListItem, 
+  ListItemButton,
+  ListItemText,
+  Box,
+  useTheme,
+  useMediaQuery
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useState, useEffect } from 'react';
 import Login from '@pages/Login';
 import Register from '@pages/Register';
@@ -12,7 +28,10 @@ import config from '@/config';
 function AppContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Check login status on mount and whenever localStorage changes
   const checkLoginStatus = () => {
@@ -43,51 +62,116 @@ function AppContent() {
     localStorage.removeItem('username');
     setIsLoggedIn(false);
     setUsername('');
+    setDrawerOpen(false);
     navigate('/login');
   };
+
+  const handleDrawerToggle = () => {
+    setDrawerOpen(!drawerOpen);
+  };
+
+  const handleNavClick = (path: string) => {
+    navigate(path);
+    setDrawerOpen(false);
+  };
+
+  const navItems = isLoggedIn ? [
+    { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Reports', path: '/reports' },
+    { label: 'Smart ID', path: '/smart-identification' },
+    { label: 'Settings', path: '/settings' },
+  ] : [];
 
   return (
     <div>
       <AppBar position="static">
         <Toolbar>
+          {isMobile && isLoggedIn && (
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Leave Tracker
           </Typography>
-          {isLoggedIn ? (
+          {!isMobile && isLoggedIn ? (
             <>
-              <Typography variant="body1" sx={{ mr: 2 }}>
-                Welcome, {username}
+              <Typography variant="body2" sx={{ mr: 2, display: { xs: 'none', sm: 'block' } }}>
+                {username}
               </Typography>
-              <Button color="inherit" component={Link} to="/dashboard">
+              <Button color="inherit" component={Link} to="/dashboard" size="small">
                 Dashboard
               </Button>
-              <Button color="inherit" component={Link} to="/reports">
+              <Button color="inherit" component={Link} to="/reports" size="small">
                 Reports
               </Button>
-              <Button color="inherit" component={Link} to="/smart-identification">
-                Smart Identification
+              <Button color="inherit" component={Link} to="/smart-identification" size="small" sx={{ display: { xs: 'none', lg: 'inline-flex' } }}>
+                Smart ID
               </Button>
-              <Button color="inherit" component={Link} to="/settings">
+              <Button color="inherit" component={Link} to="/settings" size="small">
                 Settings
               </Button>
-              <Button color="inherit" onClick={handleLogout}>
+              <Button color="inherit" onClick={handleLogout} size="small">
                 Logout
               </Button>
             </>
-          ) : (
+          ) : !isMobile && !isLoggedIn ? (
             <>
-              <Button color="inherit" component={Link} to="/login">
+              <Button color="inherit" component={Link} to="/login" size="small">
                 Login
               </Button>
               {config.features.enableRegistration && (
-                <Button color="inherit" component={Link} to="/register">
+                <Button color="inherit" component={Link} to="/register" size="small">
                   Register
                 </Button>
               )}
             </>
-          )}
+          ) : !isLoggedIn ? (
+            <Box>
+              <Button color="inherit" component={Link} to="/login" size="small">
+                Login
+              </Button>
+              {config.features.enableRegistration && (
+                <Button color="inherit" component={Link} to="/register" size="small">
+                  Register
+                </Button>
+              )}
+            </Box>
+          ) : null}
         </Toolbar>
       </AppBar>
+      
+      {/* Mobile Drawer */}
+      <Drawer
+        anchor="left"
+        open={drawerOpen}
+        onClose={handleDrawerToggle}
+      >
+        <Box sx={{ width: 250, pt: 2 }}>
+          <Typography variant="h6" sx={{ px: 2, mb: 2 }}>
+            {username}
+          </Typography>
+          <List>
+            {navItems.map((item) => (
+              <ListItem key={item.path} disablePadding>
+                <ListItemButton onClick={() => handleNavClick(item.path)}>
+                  <ListItemText primary={item.label} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleLogout}>
+                <ListItemText primary="Logout" />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        </Box>
+      </Drawer>
       <Container>
         <Routes>
           <Route path="/" element={<Login />} />
