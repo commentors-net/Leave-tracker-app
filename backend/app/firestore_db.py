@@ -55,9 +55,10 @@ class FirestoreDB:
     
     # ==================== AI INSTRUCTIONS ====================
     
-    def get_ai_instructions(self) -> Optional[Dict[str, Any]]:
-        """Get the latest AI instructions"""
+    def get_ai_instructions(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get the latest AI instructions for a user"""
         instructions = self.db.collection(self.AI_INSTRUCTIONS)\
+            .where("user_id", "==", user_id)\
             .order_by("updated_at", direction=firestore.Query.DESCENDING)\
             .limit(1)\
             .stream()
@@ -65,11 +66,12 @@ class FirestoreDB:
             return {"id": instruction.id, **instruction.to_dict()}
         return None
     
-    def create_ai_instructions(self, instructions: str) -> Dict[str, Any]:
-        """Create new AI instructions"""
+    def create_ai_instructions(self, user_id: str, instructions: str) -> Dict[str, Any]:
+        """Create new AI instructions for a user"""
         now = datetime.now().isoformat()
         instruction_ref = self.db.collection(self.AI_INSTRUCTIONS).document()
         instruction_data = {
+            "user_id": user_id,
             "instructions": instructions,
             "created_at": now,
             "updated_at": now
@@ -77,107 +79,136 @@ class FirestoreDB:
         instruction_ref.set(instruction_data)
         return {"id": instruction_ref.id, **instruction_data}
     
-    def update_ai_instructions(self, instruction_id: str, instructions: str) -> Dict[str, Any]:
-        """Update existing AI instructions"""
+    def update_ai_instructions(self, instruction_id: str, user_id: str, instructions: str) -> Dict[str, Any]:
+        """Update existing AI instructions (with user_id check for security)"""
         instruction_ref = self.db.collection(self.AI_INSTRUCTIONS).document(instruction_id)
-        instruction_data = {
-            "instructions": instructions,
-            "updated_at": datetime.now().isoformat()
-        }
-        instruction_ref.update(instruction_data)
+        # Verify ownership
         instruction = instruction_ref.get()
-        return {"id": instruction.id, **instruction.to_dict()}
+        if instruction.exists and instruction.to_dict().get("user_id") == user_id:
+            instruction_data = {
+                "instructions": instructions,
+                "updated_at": datetime.now().isoformat()
+            }
+            instruction_ref.update(instruction_data)
+            instruction = instruction_ref.get()
+            return {"id": instruction.id, **instruction.to_dict()}
+        return None
     
     # ==================== PEOPLE ====================
     
-    def create_person(self, name: str) -> Dict[str, Any]:
-        """Create a new person"""
+    def create_person(self, user_id: str, name: str) -> Dict[str, Any]:
+        """Create a new person for a user"""
         person_ref = self.db.collection(self.PEOPLE).document()
-        person_data = {"name": name}
+        person_data = {"user_id": user_id, "name": name}
         person_ref.set(person_data)
         return {"id": person_ref.id, **person_data}
     
-    def get_all_people(self) -> List[Dict[str, Any]]:
-        """Get all people"""
-        people = self.db.collection(self.PEOPLE).order_by("name").stream()
+    def get_all_people(self, user_id: str) -> List[Dict[str, Any]]:
+        """Get all people for a user"""
+        people = self.db.collection(self.PEOPLE)\
+            .where("user_id", "==", user_id)\
+            .order_by("name")\
+            .stream()
         return [{"id": person.id, **person.to_dict()} for person in people]
     
-    def get_person_by_id(self, person_id: str) -> Optional[Dict[str, Any]]:
-        """Get person by ID"""
+    def get_person_by_id(self, person_id: str, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get person by ID (with user_id check for security)"""
         person_ref = self.db.collection(self.PEOPLE).document(person_id)
         person = person_ref.get()
-        if person.exists:
+        if person.exists and person.to_dict().get("user_id") == user_id:
             return {"id": person.id, **person.to_dict()}
         return None
     
-    def get_person_by_name(self, name: str) -> Optional[Dict[str, Any]]:
-        """Get person by name"""
-        people = self.db.collection(self.PEOPLE).where("name", "==", name).limit(1).stream()
+    def get_person_by_name(self, name: str, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get person by name for a user"""
+        people = self.db.collection(self.PEOPLE)\
+            .where("user_id", "==", user_id)\
+            .where("name", "==", name)\
+            .limit(1)\
+            .stream()
         for person in people:
             return {"id": person.id, **person.to_dict()}
         return None
     
-    def update_person(self, person_id: str, name: str) -> Dict[str, Any]:
-        """Update person"""
+    def update_person(self, person_id: str, user_id: str, name: str) -> Dict[str, Any]:
+        """Update person (with user_id check for security)"""
         person_ref = self.db.collection(self.PEOPLE).document(person_id)
-        person_ref.update({"name": name})
         person = person_ref.get()
-        return {"id": person.id, **person.to_dict()}
+        if person.exists and person.to_dict().get("user_id") == user_id:
+            person_ref.update({"name": name})
+            person = person_ref.get()
+            return {"id": person.id, **person.to_dict()}
+        return None
     
-    def delete_person(self, person_id: str) -> bool:
-        """Delete person"""
+    def delete_person(self, person_id: str, user_id: str) -> bool:
+        """Delete person (with user_id check for security)"""
         self.db.collection(self.PEOPLE).document(person_id).delete()
         return True
     
     # ==================== TYPES ====================
     
-    def create_type(self, name: str) -> Dict[str, Any]:
-        """Create a new leave type"""
+    def create_type(self, user_id: str, name: str) -> Dict[str, Any]:
+        """Create a new leave type for a user"""
         type_ref = self.db.collection(self.TYPES).document()
-        type_data = {"name": name}
+        type_data = {"user_id": user_id, "name": name}
         type_ref.set(type_data)
         return {"id": type_ref.id, **type_data}
     
-    def get_all_types(self) -> List[Dict[str, Any]]:
-        """Get all leave types"""
-        types = self.db.collection(self.TYPES).order_by("name").stream()
+    def get_all_types(self, user_id: str) -> List[Dict[str, Any]]:
+        """Get all leave types for a user"""
+        types = self.db.collection(self.TYPES)\
+            .where("user_id", "==", user_id)\
+            .order_by("name")\
+            .stream()
         return [{"id": t.id, **t.to_dict()} for t in types]
     
-    def get_type_by_id(self, type_id: str) -> Optional[Dict[str, Any]]:
-        """Get type by ID"""
+    def get_type_by_id(self, type_id: str, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get type by ID (with user_id check for security)"""
         type_ref = self.db.collection(self.TYPES).document(type_id)
         type_doc = type_ref.get()
-        if type_doc.exists:
+        if type_doc.exists and type_doc.to_dict().get("user_id") == user_id:
             return {"id": type_doc.id, **type_doc.to_dict()}
         return None
     
-    def get_type_by_name(self, name: str) -> Optional[Dict[str, Any]]:
-        """Get type by name"""
-        types = self.db.collection(self.TYPES).where("name", "==", name).limit(1).stream()
+    def get_type_by_name(self, name: str, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get type by name for a user"""
+        types = self.db.collection(self.TYPES)\
+            .where("user_id", "==", user_id)\
+            .where("name", "==", name)\
+            .limit(1)\
+            .stream()
         for type_doc in types:
             return {"id": type_doc.id, **type_doc.to_dict()}
         return None
     
-    def update_type(self, type_id: str, name: str) -> Dict[str, Any]:
-        """Update leave type"""
+    def update_type(self, type_id: str, user_id: str, name: str) -> Dict[str, Any]:
+        """Update leave type (with user_id check for security)"""
         type_ref = self.db.collection(self.TYPES).document(type_id)
-        type_ref.update({"name": name})
         type_doc = type_ref.get()
-        return {"id": type_doc.id, **type_doc.to_dict()}
+        if type_doc.exists and type_doc.to_dict().get("user_id") == user_id:
+            type_ref.update({"name": name})
+            type_doc = type_ref.get()
+            return {"id": type_doc.id, **type_doc.to_dict()}
+        return None
     
-    def delete_type(self, type_id: str) -> bool:
-        """Delete leave type"""
-        self.db.collection(self.TYPES).document(type_id).delete()
-        return True
+    def delete_type(self, type_id: str, user_id: str) -> bool:
+        """Delete leave type (with user_id check for security)"""
+        type_ref = self.db.collection(self.TYPES).document(type_id)
+        type_doc = type_ref.get()
+        if type_doc.exists and type_doc.to_dict().get("user_id") == user_id:
+            type_ref.delete()
+            return True
+        return False
     
     # ==================== ABSENCES ====================
     
-    def create_absence(self, date_val: date, duration: str, reason: str, 
+    def create_absence(self, user_id: str, date_val: date, duration: str, reason: str, 
                       type_id: str, person_id: str, applied: int = 0) -> Dict[str, Any]:
-        """Create a new absence"""
+        """Create a new absence for a user"""
         absence_ref = self.db.collection(self.ABSENCES).document()
         absence_data = {
-            "date": date_val.isoformat(),  # Store as ISO string
+            "user_id": user_id,
+            "date": date_val.isoformat() if isinstance(date_val, date) else date_val,  # Store as ISO string
             "duration": duration,
             "reason": reason,
             "type_id": type_id,
@@ -188,12 +219,12 @@ class FirestoreDB:
         absence_ref.set(absence_data)
         return {"id": absence_ref.id, **absence_data}
     
-    def get_all_absences(self, person_id: Optional[str] = None, 
+    def get_all_absences(self, user_id: str, person_id: Optional[str] = None, 
                          type_id: Optional[str] = None,
                          date_from: Optional[date] = None,
                          date_to: Optional[date] = None) -> List[Dict[str, Any]]:
-        """Get all absences with optional filters"""
-        query = self.db.collection(self.ABSENCES)
+        """Get all absences for a user with optional filters"""
+        query = self.db.collection(self.ABSENCES).where("user_id", "==", user_id)
         
         # Apply filters
         if person_id:
@@ -213,63 +244,83 @@ class FirestoreDB:
         for absence in absences:
             data = absence.to_dict()
             # Convert date string back to date object
-            if "date" in data:
-                data["date"] = datetime.fromisoformat(data["date"]).date()
+            if "date" in data and isinstance(data["date"], str):
+                try:
+                    data["date"] = datetime.fromisoformat(data["date"]).date()
+                except:
+                    pass  # Keep as string if conversion fails
             result.append({"id": absence.id, **data})
         return result
     
-    def get_absence_by_id(self, absence_id: str) -> Optional[Dict[str, Any]]:
-        """Get absence by ID"""
+    def get_absence_by_id(self, absence_id: str, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get absence by ID (with user_id check for security)"""
         absence_ref = self.db.collection(self.ABSENCES).document(absence_id)
         absence = absence_ref.get()
-        if absence.exists:
+        if absence.exists and absence.to_dict().get("user_id") == user_id:
             data = absence.to_dict()
             # Convert date string back to date object
-            if "date" in data:
-                data["date"] = datetime.fromisoformat(data["date"]).date()
+            if "date" in data and isinstance(data["date"], str):
+                try:
+                    data["date"] = datetime.fromisoformat(data["date"]).date()
+                except:
+                    pass  # Keep as string if conversion fails
             return {"id": absence.id, **data}
         return None
     
-    def update_absence(self, absence_id: str, **kwargs) -> Dict[str, Any]:
-        """Update absence fields"""
+    def update_absence(self, absence_id: str, user_id: str, applied: int) -> Dict[str, Any]:
+        """Update absence (user_id check for security)"""
         absence_ref = self.db.collection(self.ABSENCES).document(absence_id)
-        
-        # Convert date to ISO string if present
-        if "date" in kwargs and isinstance(kwargs["date"], date):
-            kwargs["date"] = kwargs["date"].isoformat()
-        
-        absence_ref.update(kwargs)
         absence = absence_ref.get()
-        data = absence.to_dict()
         
-        # Convert date string back to date object
-        if "date" in data:
-            data["date"] = datetime.fromisoformat(data["date"]).date()
-        
-        return {"id": absence.id, **data}
+        if absence.exists and absence.to_dict().get("user_id") == user_id:
+            absence_ref.update({"applied": applied})
+            absence = absence_ref.get()
+            data = absence.to_dict()
+            
+            # Convert date string back to date object
+            if "date" in data and isinstance(data["date"], str):
+                try:
+                    data["date"] = datetime.fromisoformat(data["date"]).date()
+                except:
+                    pass
+            
+            return {"id": absence.id, **data}
+        return None
     
-    def delete_absence(self, absence_id: str) -> bool:
-        """Delete absence"""
-        self.db.collection(self.ABSENCES).document(absence_id).delete()
-        return True
+    def delete_absence(self, absence_id: str, user_id: str) -> bool:
+        """Delete absence (with user_id check for security)"""
+        absence_ref = self.db.collection(self.ABSENCES).document(absence_id)
+        absence = absence_ref.get()
+        if absence.exists and absence.to_dict().get("user_id") == user_id:
+            absence_ref.delete()
+            return True
+        return False
     
-    def bulk_delete_absences(self, absence_ids: List[str]) -> int:
-        """Delete multiple absences"""
+    def bulk_delete_absences(self, absence_ids: List[str], user_id: str) -> int:
+        """Delete multiple absences (with user_id check for security)"""
         batch = self.db.batch()
+        deleted_count = 0
         for absence_id in absence_ids:
             absence_ref = self.db.collection(self.ABSENCES).document(absence_id)
-            batch.delete(absence_ref)
+            absence = absence_ref.get()
+            if absence.exists and absence.to_dict().get("user_id") == user_id:
+                batch.delete(absence_ref)
+                deleted_count += 1
         batch.commit()
-        return len(absence_ids)
+        return deleted_count
     
-    def bulk_update_applied(self, absence_ids: List[str], applied: int) -> int:
-        """Update applied status for multiple absences"""
+    def bulk_update_applied(self, absence_ids: List[str], user_id: str, applied: int) -> int:
+        """Update applied status for multiple absences (with user_id check for security)"""
         batch = self.db.batch()
+        updated_count = 0
         for absence_id in absence_ids:
             absence_ref = self.db.collection(self.ABSENCES).document(absence_id)
-            batch.update(absence_ref, {"applied": applied})
+            absence = absence_ref.get()
+            if absence.exists and absence.to_dict().get("user_id") == user_id:
+                batch.update(absence_ref, {"applied": applied})
+                updated_count += 1
         batch.commit()
-        return len(absence_ids)
+        return updated_count
 
 
 # Global instance
