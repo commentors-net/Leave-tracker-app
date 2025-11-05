@@ -26,44 +26,44 @@ DEFAULT_INSTRUCTIONS = """RULES:
 
 @router.get("/ai-instructions", response_model=schemas.AIInstructions)
 async def get_ai_instructions(
-    current_user: str = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
     """Get current AI instructions for Smart Identification"""
-    instructions = db.get_ai_instructions()
+    instructions = db.get_ai_instructions(current_user["id"])
     
     if not instructions:
-        # Create default instructions if none exist
-        instructions = db.create_ai_instructions(DEFAULT_INSTRUCTIONS)
+        # Create default instructions if none exist for this user
+        instructions = db.create_ai_instructions(current_user["id"], DEFAULT_INSTRUCTIONS)
     
     return instructions
 
 @router.put("/ai-instructions", response_model=schemas.AIInstructions)
 async def update_ai_instructions(
     request: schemas.AIInstructionsUpdate,
-    current_user: str = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
     """Update AI instructions for Smart Identification"""
-    instructions = db.get_ai_instructions()
+    instructions = db.get_ai_instructions(current_user["id"])
     
     if not instructions:
-        # Create if doesn't exist
-        instructions = db.create_ai_instructions(request.instructions)
+        # Create if doesn't exist for this user
+        instructions = db.create_ai_instructions(current_user["id"], request.instructions)
     else:
         # Update existing
-        instructions = db.update_ai_instructions(instructions["id"], request.instructions)
+        instructions = db.update_ai_instructions(instructions["id"], current_user["id"], request.instructions)
     
     return instructions
 
 @router.post("/ai-instructions/reset", response_model=schemas.AIInstructions)
 async def reset_ai_instructions(
-    current_user: str = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
     """Reset AI instructions to default"""
-    instructions = db.get_ai_instructions()
+    instructions = db.get_ai_instructions(current_user["id"])
     
     if not instructions:
-        instructions = db.create_ai_instructions(DEFAULT_INSTRUCTIONS)
+        instructions = db.create_ai_instructions(current_user["id"], DEFAULT_INSTRUCTIONS)
     else:
-        instructions = db.update_ai_instructions(instructions["id"], DEFAULT_INSTRUCTIONS)
+        instructions = db.update_ai_instructions(instructions["id"], current_user["id"], DEFAULT_INSTRUCTIONS)
     
     return instructions

@@ -18,7 +18,7 @@ if GEMINI_API_KEY:
 @router.post("/smart-identify", response_model=schemas.SmartIdentificationResponse)
 async def smart_identify_leaves(
     request: schemas.SmartIdentificationRequest,
-    current_user: str = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
     """
     Parse chat conversations to identify leave requests using Google Gemini AI.
@@ -37,12 +37,12 @@ async def smart_identify_leaves(
         )
     
     try:
-        # Get all people and leave types from Firestore for context
-        people = db.get_all_people()
-        leave_types = db.get_all_types()
+        # Get all people and leave types for this user for context
+        people = db.get_all_people(current_user["id"])
+        leave_types = db.get_all_types(current_user["id"])
         
-        # Get AI instructions from Firestore
-        ai_instructions = db.get_ai_instructions()
+        # Get AI instructions for this user
+        ai_instructions = db.get_ai_instructions(current_user["id"])
         if ai_instructions:
             rules_text = ai_instructions["instructions"]
         else:
@@ -150,7 +150,7 @@ Return ONLY valid JSON, no additional text.
         )
 
 @router.get("/smart-identify/health")
-async def check_smart_identify_health(current_user: str = Depends(get_current_user)):
+async def check_smart_identify_health(current_user: dict = Depends(get_current_user)):
     """Check if Gemini API is configured and accessible"""
     if not GEMINI_API_KEY:
         return {
