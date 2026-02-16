@@ -3,7 +3,7 @@ import google.generativeai as genai
 import os
 import json
 import re
-from datetime import datetime
+from typing import List, Optional
 from .. import schemas
 from ..db_factory import db
 from ..core.security import get_current_user
@@ -12,8 +12,131 @@ router = APIRouter()
 
 # Configure Gemini API
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-lite")
+FALLBACK_GEMINI_MODELS = [
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash-latest",
+]
+_resolved_gemini_model: Optional[str] = None
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
+
+def _normalize_model_name(model_name: str) -> str:
+    if model_name.startswith("models/"):
+        return model_name.split("/", 1)[1]
+    return model_name
+
+def _list_generate_content_models() -> List[str]:
+    models = []
+    for model in genai.list_models():
+        methods = getattr(model, "supported_generation_methods", []) or []
+        if "generateContent" not in methods:
+            continue
+
+        model_name = _normalize_model_name(getattr(model, "name", ""))
+        if model_name and model_name not in models:
+            models.append(model_name)
+    return models
+
+def resolve_gemini_model(force_refresh: bool = False) -> str:
+    global _resolved_gemini_model
+
+    if _resolved_gemini_model and not force_refresh:
+        return _resolved_gemini_model
+
+    preferred_model = _normalize_model_name(GEMINI_MODEL)
+    candidate_models = []
+    for model_name in [preferred_model, *FALLBACK_GEMINI_MODELS]:
+        normalized = _normalize_model_name(model_name)
+        if normalized and normalized not in candidate_models:
+            candidate_models.append(normalized)
+
+    try:
+        available_models = _list_generate_content_models()
+
+        for model_name in candidate_models:
+            if model_name in available_models:
+                _resolved_gemini_model = model_name
+                return _resolved_gemini_model
+
+        if available_models:
+            _resolved_gemini_model = available_models[0]
+            return _resolved_gemini_model
+    except Exception:
+        # If list_models fails, fall back to configured model and let request path surface real API errors.
+        pass
+
+    _resolved_gemini_model = preferred_model
+    return _resolved_gemini_model
+
+def generate_content_with_resolved_model(prompt: str):
+    model_name = resolve_gemini_model()
+    try:
+        model = genai.GenerativeModel(model_name)
+        return model.generate_content(prompt), model_name
+    except Exception as first_error:
+        message = str(first_error).lower()
+        should_refresh = "404" in message or "not found" in message or "not supported" in message
+        if not should_refresh:
+            raise
+
+        refreshed_model = resolve_gemini_model(force_refresh=True)
+        if refreshed_model == model_name:
+            raise
+
+        model = genai.GenerativeModel(refreshed_model)
+        return model.generate_content(prompt), refreshed_model
+
+def _extract_retry_seconds(error_text: str) -> Optional[int]:
+    retry_in_match = re.search(r"retry in\s+([0-9]+(?:\.[0-9]+)?)s", error_text, flags=re.IGNORECASE)
+    if retry_in_match:
+        return int(float(retry_in_match.group(1)))
+
+    retry_delay_match = re.search(r"retry_delay\s*\{\s*seconds:\s*(\d+)", error_text, flags=re.IGNORECASE)
+    if retry_delay_match:
+        return int(retry_delay_match.group(1))
+
+    return None
+
+def _raise_http_for_gemini_error(error: Exception) -> None:
+    error_text = str(error)
+    lowered = error_text.lower()
+
+    is_quota_or_rate_limit = (
+        "429" in lowered
+        or "quota exceeded" in lowered
+        or "rate limit" in lowered
+        or "resource_exhausted" in lowered
+    )
+    if is_quota_or_rate_limit:
+        retry_seconds = _extract_retry_seconds(error_text)
+        detail = (
+            "Gemini quota exceeded for this API key/project. "
+            "Enable billing or use a key with available quota."
+        )
+        if retry_seconds is not None:
+            detail += f" Retry after about {retry_seconds} seconds."
+
+        headers = {"Retry-After": str(retry_seconds)} if retry_seconds is not None else None
+        raise HTTPException(status_code=429, detail=detail, headers=headers)
+
+    is_gemini_related = (
+        "gemini" in lowered
+        or "generativelanguage" in lowered
+        or "generatecontent" in lowered
+        or "google.api_core" in lowered
+    )
+    if is_gemini_related:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Gemini API request failed: {error_text}"
+        )
+
+    raise HTTPException(
+        status_code=500,
+        detail=f"Error processing conversation: {error_text}"
+    )
 
 @router.post("/smart-identify", response_model=schemas.SmartIdentificationResponse)
 async def smart_identify_leaves(
@@ -67,9 +190,6 @@ async def smart_identify_leaves(
         people_names = [p["name"] for p in people] if people else []
         leave_type_names = [t["name"] for t in leave_types] if leave_types else []
         
-        # Initialize Gemini model (use gemini-2.0-flash-exp)
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
-        
         # Create the prompt
         prompt = f"""
 You are an expert at parsing chat conversations to identify leave/absence requests.
@@ -110,8 +230,8 @@ OUTPUT FORMAT (JSON):
 Return ONLY valid JSON, no additional text.
 """
         
-        # Call Gemini API with gemini-2.0-flash-exp model
-        response = model.generate_content(prompt)
+        # Call Gemini API
+        response, _ = generate_content_with_resolved_model(prompt)
         response_text = response.text.strip()
         
         # Extract JSON from response (sometimes Gemini wraps it in markdown)
@@ -144,10 +264,7 @@ Return ONLY valid JSON, no additional text.
             detail=f"Failed to parse AI response: {str(e)}. Response: {response_text}"
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error processing conversation: {str(e)}"
-        )
+        _raise_http_for_gemini_error(e)
 
 @router.get("/smart-identify/health")
 async def check_smart_identify_health(current_user: str = Depends(get_current_user)):
@@ -160,14 +277,21 @@ async def check_smart_identify_health(current_user: str = Depends(get_current_us
         }
     
     try:
-        # Try a simple test call (use gemini-2.0-flash-exp)
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
-        response = model.generate_content("Say 'OK' if you can read this.")
+        # Validate key and available generateContent models without consuming generation quota.
+        available_models = _list_generate_content_models()
+        if not available_models:
+            return {
+                "status": "error",
+                "message": "Gemini API reachable, but no models support generateContent for this key/project",
+                "configured": True
+            }
+
+        resolved_model = resolve_gemini_model(force_refresh=True)
         return {
             "status": "success",
-            "message": "Gemini API is configured and working",
+            "message": "Gemini API key configured and model resolved",
             "configured": True,
-            "model": "gemini-2.0-flash-exp"
+            "model": resolved_model
         }
     except Exception as e:
         return {

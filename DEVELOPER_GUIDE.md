@@ -269,7 +269,7 @@ npm run dev
 
 **Supported formats:** WhatsApp, Slack, Teams, Telegram
 
-**Model:** `gemini-2.0-flash-exp`
+**Model:** `gemini-1.5-flash` (configurable via `GEMINI_MODEL`)
 
 **Cost:** FREE (within daily limits)
 
@@ -383,7 +383,7 @@ POST /api/smart-identify   {"conversation": "string"}
  {"entries": [...], "raw_analysis": "string"}
 
 GET  /api/smart-identify/health
- {"status": "success", "model": "gemini-2.0-flash-exp"}
+ {"status": "success", "model": "gemini-1.5-flash"}
 ```
 
 ### Interactive Docs
@@ -404,6 +404,36 @@ GET  /api/smart-identify/health
 # Full deployment (first time)
 .\deploy-to-gcp-complete.ps1 -ProjectId "your-project"
 ```
+
+Note: The deployment scripts use Cloud Build, so local Docker is not required.
+
+### Production Checklist
+
+- Ensure `gcloud` is authenticated to the correct project.
+- Confirm the Cloud Run service uses Firestore (ENVIRONMENT=production).
+- Make sure the service account running Cloud Run has Firestore access.
+- Verify the frontend bucket name matches `PROJECTID-frontend`.
+- If you change the backend URL, rebuild the frontend so `VITE_API_URL` is updated.
+
+### IAM and Firestore Access
+
+The backend uses Firestore in production and relies on the Cloud Run service account.
+Grant at least the following IAM roles on the project:
+
+- `roles/datastore.user` (Firestore read/write)
+- `roles/cloudbuild.builds.editor` (Cloud Build)
+- `roles/artifactregistry.writer` (image push)
+- `roles/run.admin` (deploy Cloud Run)
+- `roles/storage.admin` (upload frontend assets)
+
+If Firestore calls fail, check that the Cloud Run service account has `roles/datastore.user`
+and that Firestore is enabled in the project.
+
+### CORS Notes
+
+The deploy script sets `CORS_ORIGINS` to `https://storage.googleapis.com`.
+If you serve the frontend from a custom domain or different bucket URL, update
+`CORS_ORIGINS` accordingly and redeploy the backend.
 
 ### Manual Deployment
 
@@ -468,7 +498,7 @@ gcloud storage cp dist/* gs://bucket-name/
 - Set `GEMINI_API_KEY` in .env
 - Restart backend
 - Verify key at https://aistudio.google.com/
-- Check model is `gemini-2.0-flash-exp`
+- Check model is `gemini-1.5-flash` (or set `GEMINI_MODEL` to a valid model)
 
 ### Frontend Shows Old Version
 - Clear browser cache
