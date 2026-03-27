@@ -134,7 +134,7 @@ def verify_token(token: str) -> Optional[str]:
         return None
 
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
     """
     FastAPI dependency to get current authenticated user from JWT token.
     
@@ -142,11 +142,13 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         credentials: HTTP Authorization credentials (Bearer token)
     
     Returns:
-        Username from validated token
+        User dict with id and username from validated token
     
     Raises:
         HTTPException: If token is invalid or missing
     """
+    from ..db_factory import db
+    
     token = credentials.credentials
     username = verify_token(token)
     if username is None:
@@ -155,4 +157,14 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return username
+    
+    # Get user from database to return full user object with ID
+    user = db.get_user_by_username(username)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    return user

@@ -13,3 +13,6 @@ passlib[bcrypt]
 python-dotenv
 google-generativeai
 google-cloud-firestore
+pytest
+pytest-asyncio
+httpx
